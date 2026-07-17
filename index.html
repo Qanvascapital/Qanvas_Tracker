@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qanvas Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   [บล็อก 2] สไตล์ (CSS) — โทนสว่างแบบเว็บ AI สากล
+   แก้สีทั้งหมดได้ที่ :root ด้านล่าง
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  /* พื้นหลังเข้มขึ้น มีมิติแบบ hi-tech (อ้างอิง Linear dark-tint / Vercel) */
+  --bg:#EBF1F7; --bg-grad:radial-gradient(1400px 700px at 75% -15%, #DCEAF4 0%, #E6EEF5 45%, #E3EBF3 100%);
+  --panel:#FFFFFF; --line:#DCE5EE; --line2:#C6D4E0;
+  /* navy เข้มเป็นฐาน = ตัวทำให้ดูคม/ไฮเทค */
+  --navy:#0A1F33; --navy2:#12324F; --navy-grad:linear-gradient(160deg,#0C2438,#143B5C);
+  --ink:#0A1F33; --ink2:#48607A; --ink3:#7C93A8;
+  --teal:#0891A5; --teal-d:#046A7C; --teal-bg:#DEF3F7; --teal-grad:linear-gradient(135deg,#00A0B8,#22C9D9);
+  --sky:#DCF0F9; --sky-d:#02698F;
+  --red:#DC3D42; --red-bg:#FCE7E8; --amber:#CF850A; --amber-bg:#FCEFD9; --green:#248A57; --green-bg:#DFF2E8;
+  --purple:#7C4DEF; --purple-bg:#EBE2FC;
+  --gray-bg:#E6ECF3;
+  /* เงานุ่มหลายชั้น = มิติ (Stripe/Linear style) */
+  --shadow-sm:0 1px 2px rgba(10,31,51,.06);
+  --shadow:0 1px 3px rgba(10,31,51,.07),0 6px 20px rgba(10,31,51,.09);
+  --shadow-lg:0 6px 16px rgba(10,31,51,.1),0 20px 48px rgba(10,31,51,.15);
+  --shadow-teal:0 4px 16px rgba(8,145,165,.32);
+  --radius:13px;
+  /* motion tokens (อ้างอิง Linear — โค้ง cubic ให้รู้สึก "สปริง" นุ่ม) */
+  --ease:cubic-bezier(.32,.72,0,1);
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --dur:.22s; --dur-slow:.4s;
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);background-image:var(--bg-grad);background-attachment:fixed;font-family:'Inter',system-ui,sans-serif;color:var(--ink);line-height:1.55;font-size:15px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.mono{font-family:'JetBrains Mono',monospace}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+.hidden{display:none !important}
+
+/* ---- layout ---- */
+.app{max-width:1180px;margin:0 auto;padding:0 18px 60px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 0;position:sticky;top:0;background:var(--bg);z-index:20}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--teal),#38CFE0);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px}
+.brand .bt{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.brand .bs{font-size:11.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em}
+.topright{display:flex;align-items:center;gap:10px}
+.sync-chip{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink2);background:var(--panel);border:1px solid var(--line);padding:5px 11px;border-radius:20px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--teal)}
+.help-btn{width:28px;height:28px;border-radius:50%;background:var(--panel);border:1.5px solid var(--line2);color:var(--ink2);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all var(--dur) var(--ease)}
+.help-btn:hover{border-color:var(--teal);color:var(--teal-d);transform:scale(1.08)}
+.help-section{margin-bottom:16px}
+.help-section h4{font-size:13px;font-weight:700;color:var(--teal-d);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.help-section p{font-size:12.5px;color:var(--ink2);line-height:1.6;margin-bottom:3px}
+.help-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+.help-tbl th{text-align:left;padding:5px 8px;background:var(--bg);color:var(--ink3);font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--line)}
+.help-tbl td{padding:5px 8px;border-bottom:1px solid var(--line);color:var(--ink2);vertical-align:top}
+.help-tbl td b{color:var(--ink)}
+.help-tbl .mono-s{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--teal-d)}
+.help-tag{display:inline-block;font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:4px;margin-right:4px}
+.lang-tog{display:flex;background:var(--panel);border:1px solid var(--line2);border-radius:7px;overflow:hidden}
+.lang-tog button{padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+.lang-tog button.on{background:var(--teal);color:#fff}
+
+/* ---- nav tabs ---- */
+.tabs{display:flex;gap:3px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.tab{padding:10px 16px;font-size:14px;color:var(--ink2);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:7px}
+.tab.on{color:var(--teal-d);border-color:var(--teal);font-weight:600}
+.tab:hover:not(.on){color:var(--ink)}
+
+/* ---- toolbar / filters ---- */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.sel{position:relative}
+.sel select{appearance:none;background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:8px 28px 8px 11px;font-size:13.5px;color:var(--ink);cursor:pointer;font-family:inherit}
+.sel select:focus{outline:2px solid var(--teal-bg);border-color:var(--teal)}
+.sel.active select{border-color:var(--teal);background:var(--teal-bg);color:var(--teal-d);font-weight:600}
+.sel::after{content:'▾';position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11.5px;color:var(--ink3);pointer-events:none}
+.search{flex:1;min-width:150px;display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:8px 12px}
+.search input{border:none;outline:none;flex:1;font-size:13.5px;font-family:inherit;color:var(--ink);background:none}
+.search svg{flex-shrink:0}
+.viewtog{display:flex;background:var(--panel);border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+.viewtog button{padding:8px 11px;font-size:13.5px;color:var(--ink3);display:flex;align-items:center;gap:5px}
+.viewtog button.on{background:var(--teal);color:#fff}
+.btn-primary{display:inline-flex;align-items:center;gap:6px;background:var(--teal);color:#fff;font-size:13.5px;font-weight:600;padding:8px 14px;border-radius:8px}
+.btn-primary:hover{background:var(--teal-d)}
+.btn-ghost{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line2);color:var(--ink2);font-size:13.5px;font-weight:500;padding:8px 12px;border-radius:8px}
+.btn-ghost:hover{border-color:var(--teal);color:var(--teal-d)}
+.btn-ghost.on-done{background:var(--teal-bg);border-color:var(--teal);color:var(--teal-d);font-weight:600}
+
+/* ---- chips ---- */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;min-height:1px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;background:var(--teal-bg);color:var(--teal-d);padding:4px 10px;border-radius:14px;font-weight:500}
+.chip button{color:var(--teal-d);opacity:.6;font-size:13.5px;line-height:1}
+.chip button:hover{opacity:1}
+.chip-clear{background:var(--gray-bg);color:var(--ink2)}
+
+/* ---- table ---- */
+.tbl-wrap{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+thead th{text-align:left;padding:10px 13px;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink3);font-weight:600;border-bottom:1px solid var(--line);background:var(--bg);white-space:nowrap}
+tbody td{padding:11px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#FAFCFD}
+.grp-row td{background:#F3F7FA;font-weight:600;font-size:12.5px;color:var(--ink);cursor:pointer;user-select:none}
+.grp-row td:hover{background:#EAF1F7}
+.grp-caret{display:inline-block;width:14px;color:var(--ink3);transition:transform .15s}
+.grp-row.collapsed .grp-caret{transform:rotate(-90deg)}
+.grp-count{color:var(--ink3);font-weight:500;font-size:11.5px;margin-left:6px}
+
+.rag{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;white-space:nowrap}
+.rag-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.rag-red{color:#C4383C}.rag-red .rag-dot{background:var(--red)}
+.rag-amber{color:#B87A14}.rag-amber .rag-dot{background:var(--amber)}
+.rag-green{color:#1F7A4D}.rag-green .rag-dot{background:var(--green)}
+.rag-none{color:var(--ink3)}.rag-none .rag-dot{background:var(--ink3)}
+
+.pill{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:5px;font-weight:500;white-space:nowrap}
+.st-notstarted{background:var(--gray-bg);color:var(--ink2)}
+.st-inprogress{background:var(--sky);color:var(--sky-d)}
+.st-waiting{background:var(--amber-bg);color:var(--amber)}
+.st-blocked{background:var(--purple-bg);color:#6D3FC4}
+.st-done{background:var(--green-bg);color:#1F7A4D}
+.st-dropped{background:var(--gray-bg);color:var(--ink3)}
+.st-timeline{background:#EEF1F5;color:#5B7286;border:1px solid #D6DEE7}
+.pri{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;padding:2px 7px;border-radius:5px}
+.pri-P1{background:var(--red-bg);color:var(--red)}
+.pri-P2{background:var(--gray-bg);color:var(--ink2)}
+.pri-P3{background:var(--gray-bg);color:var(--ink3)}
+.dl{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink)}
+.dl-soon{color:var(--red);font-weight:600}
+.tf-tag{font-size:11.5px;color:var(--ink2);background:var(--gray-bg);padding:2px 7px;border-radius:5px}
+.task-cell{font-weight:500;color:var(--ink);max-width:260px}
+.warn-cell{background:var(--amber-bg) !important;position:relative}
+
+/* ---- cards ---- */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);border-left:3px solid var(--line2)}
+.card.rl-red{border-left-color:var(--red)}.card.rl-amber{border-left-color:var(--amber)}.card.rl-green{border-left-color:var(--green)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:9px}
+.card-task{font-size:14px;font-weight:600;color:var(--ink)}
+.card-meta{font-size:12.5px;color:var(--ink2);margin-bottom:4px}
+.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+
+/* ---- dashboard ---- */
+.dash-h{font-size:17px;font-weight:700;margin-bottom:3px;letter-spacing:-.01em}
+.dash-sub{font-size:13.5px;color:var(--ink2);margin-bottom:18px}
+.focus-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.focus-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px;box-shadow:var(--shadow);border-left:3px solid}
+.focus-card.red{border-left-color:var(--red)}
+.focus-card.amber{border-left-color:var(--amber)}
+.focus-card.purple{border-left-color:var(--purple)}
+.focus-card.teal{border-left-color:var(--teal)}
+.focus-n{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:600;line-height:1;color:var(--ink)}
+.focus-l{font-size:12.5px;color:var(--ink2);margin-top:7px;line-height:1.35}
+.dash-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 17px;box-shadow:var(--shadow)}
+.panel h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--teal-d);font-weight:600;margin-bottom:13px}
+.bar-row{display:flex;align-items:center;gap:11px;margin-bottom:10px;font-size:13.5px}
+.bar-label{min-width:118px;color:var(--ink2);flex-shrink:0}
+.bar-track{flex:1;height:18px;background:#C2D0DD;border-radius:5px;overflow:hidden;min-width:0}
+.bar-fill{height:100%;border-radius:5px;min-width:4px;display:block}
+.bar-n{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink);min-width:22px;text-align:right;font-weight:500}
+
+/* ---- calendar ---- */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-title{font-size:15px;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-dow{text-align:center;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink3);font-weight:600;padding:6px 0}
+.cal-cell{background:var(--panel);border:1px solid var(--line);border-radius:9px;min-height:82px;padding:7px 8px}
+.cal-cell.empty{background:transparent;border:none}
+.cal-cell.today{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}
+.cal-date{font-size:12.5px;color:var(--ink2);font-weight:600;margin-bottom:5px}
+.cal-cell.today .cal-date{color:var(--teal-d)}
+.cal-ev{font-size:12.5px;padding:3px 6px;border-radius:5px;margin-bottom:3px;background:var(--teal-bg);color:var(--teal-d);line-height:1.3;cursor:default}
+.cal-ev.red{background:var(--red-bg);color:var(--red)}
+.cal-ev.meeting{background:var(--purple-bg);color:#6D3FC4}
+.cal-cell.has-ev{cursor:pointer}
+.cal-cell.sel{border-color:var(--teal);box-shadow:0 0 0 2px var(--teal)}
+.cal-hint{font-size:12px;color:var(--ink3);margin-top:12px}
+.cal-detail{margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.cal-detail-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-detail-date{font-size:14px;font-weight:600;color:var(--navy)}
+.cal-detail-close{cursor:pointer;color:var(--ink3);font-size:16px;line-height:1;border:none;background:none}
+.cal-task{padding:12px 0;border-top:1px solid var(--line)}
+.cal-task:first-child{border-top:none;padding-top:0}
+.cal-task-t{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px}
+.cal-kv{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:12.5px}
+.cal-kv .k{color:var(--ink2)}
+.cal-kv .v{color:var(--ink)}
+
+/* ---- customer timeline ---- */
+.cust-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.cust-name{font-size:17px;font-weight:700}
+.deal-block{margin-bottom:8px}
+.deal-title{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;margin-bottom:2px;padding:10px 0 4px}
+.deal-title .dot{width:10px;height:10px;border-radius:50%;background:var(--teal)}
+.tl-item{display:grid;grid-template-columns:76px 1fr auto;align-items:start;gap:14px;padding:9px 0 9px 16px;margin-left:5px;border-left:2px solid var(--line2);position:relative;font-size:13.5px}
+.tl-item::before{content:'';position:absolute;left:-5px;top:15px;width:8px;height:8px;border-radius:50%;background:var(--ink3);border:2px solid var(--panel)}
+.tl-item.red::before{background:var(--red)}
+.tl-item.amber::before{background:var(--amber)}
+.tl-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink2);padding-top:2px}
+.tl-mid{min-width:0}
+.tl-task{color:var(--ink);line-height:1.4}
+.tl-next{font-size:11.5px;color:#5B7286;margin-top:3px;display:flex;align-items:baseline;gap:5px}
+.tl-next b{color:var(--teal);font-weight:600;font-size:10px;letter-spacing:.03em;text-transform:uppercase;flex-shrink:0}
+.tl-next.empty{color:var(--ink3)}
+.tl-item .pill{justify-self:end;margin-top:1px}
+.tl-summary{background:var(--teal-bg);border-radius:var(--radius);padding:14px 16px;margin-top:14px}
+.tl-empty{padding:20px 4px;color:var(--ink3);font-size:13.5px}
+.tl-sum-t{font-size:13.5px;font-weight:600;color:var(--teal-d);margin-bottom:4px}
+.tl-sum-s{font-size:12.5px;color:var(--ink2);margin-bottom:10px}
+
+/* ---- summary modal ---- */
+.modal-bg{position:fixed;inset:0;background:rgba(15,42,67,.4);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal{background:var(--panel);border-radius:14px;max-width:520px;width:100%;max-height:85vh;overflow:auto;box-shadow:0 20px 60px rgba(15,42,67,.3)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
+.modal-head h3{font-size:14px;font-weight:600}
+.modal-close{font-size:20px;color:var(--ink3);line-height:1}
+.seg{display:flex;background:var(--bg);border-radius:8px;padding:3px;gap:2px;margin:16px 18px 0}
+.seg button{flex:1;padding:7px;font-size:12.5px;border-radius:6px;color:var(--ink2);font-weight:500}
+.seg button.on{background:var(--teal);color:#fff;font-weight:600}
+.summary-pre{margin:14px 18px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:14px;font-size:13.5px;line-height:1.9;white-space:pre-wrap;color:var(--ink);max-height:320px;overflow:auto}
+.modal-foot{padding:0 18px 18px;display:flex;gap:8px}
+.empty-note{text-align:center;color:var(--ink3);font-size:13.5px;padding:30px}
+
+/* ---- responsive ---- */
+@media(max-width:820px){
+  .focus-grid{grid-template-columns:repeat(2,1fr)}
+  .dash-cols{grid-template-columns:1fr}
+  .cal-grid{font-size:11px}
+  .cal-cell{min-height:60px}
+}
+@media(max-width:560px){
+  .tabs{overflow-x:auto}
+  .tbl-wrap{overflow-x:auto}
+  table{min-width:640px}
+}
+
+/* ═══ MOTION — micro-interactions & transitions (อ้างอิง Linear/Stripe) ═══ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+
+/* หน้าเปลี่ยน → จางขึ้นนุ่ม */
+.page:not(.hidden){animation:fadeUp var(--dur-slow) var(--ease-out)}
+/* การ์ด/แถว/panel ทยอยโผล่ (stagger) */
+.card{animation:fadeUp var(--dur-slow) var(--ease-out) backwards}
+.card:nth-child(1){animation-delay:.02s}.card:nth-child(2){animation-delay:.05s}
+.card:nth-child(3){animation-delay:.08s}.card:nth-child(4){animation-delay:.11s}
+.card:nth-child(5){animation-delay:.14s}.card:nth-child(6){animation-delay:.17s}
+.focus-card{animation:scaleIn var(--dur-slow) var(--ease-out) backwards}
+.focus-card:nth-child(1){animation-delay:.04s}.focus-card:nth-child(2){animation-delay:.09s}
+.focus-card:nth-child(3){animation-delay:.14s}.focus-card:nth-child(4){animation-delay:.19s}
+
+/* transition ทั่วไป — ทุกอันที่กดได้ */
+.tab,.sel select,.btn-primary,.btn-ghost,.viewtog button,.lang-tog button,
+.chip,.card,.focus-card,.cal-ev,.tl-item,.grp-row td,.modal-close,.seg button{
+  transition:all var(--dur) var(--ease)}
+
+/* hover: ยกขึ้น + เงาเข้ม (รู้ว่ากดได้) */
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-left-width:4px}
+.focus-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:var(--shadow-teal)}
+.btn-primary:active{transform:translateY(0) scale(.98)}
+.btn-ghost:active,.viewtog button:active,.tab:active{transform:scale(.97)}
+.cal-ev:hover{transform:translateX(2px);filter:brightness(.97)}
+.tl-item:hover{background:var(--bg);border-radius:8px}
+.chip:hover{transform:scale(1.04)}
+
+/* focus cards + buttons ใช้ teal gradient */
+.btn-primary{background:var(--teal-grad) !important;box-shadow:var(--shadow-sm)}
+.logo{background:var(--teal-grad)}
+.tab.on,.lang-tog button.on,.viewtog button.on,.seg button.on{background:var(--teal-grad) !important}
+
+/* bar วิ่งจาก 0 */
+
+/* modal สไลด์ขึ้น + ฉากหลังจาง */
+.modal-bg{animation:fadeIn var(--dur) ease}
+.modal{animation:slideUp var(--dur-slow) var(--ease-out)}
+
+/* underline นำทางแบบ Linear (ขีดล่างเลื่อนตาม) */
+.tab{position:relative}
+.tab.on::after{content:'';position:absolute;left:12px;right:12px;bottom:-1px;height:2px;background:var(--teal-grad);border-radius:2px;animation:fadeIn var(--dur) ease}
+
+/* row hover ในตาราง = ไฮไลต์นุ่ม + ขยับ */
+tbody tr{transition:background var(--dur) ease}
+
+
+/* ═══ FIX รอบ 3: contrast เข้ม + สมดุล + มือถือ ═══ */
+/* หัวข้อใหญ่เข้มคม */
+.brand .bt{color:var(--navy);font-weight:700}
+.dash-h,.cust-name,.cal-title{color:var(--navy)}
+/* topbar มีเส้นล่างคม + พื้นเนียน */
+.topbar{border-bottom:1px solid var(--line);backdrop-filter:blur(8px);background:rgba(235,241,247,.85)}
+/* tabs bar เข้มขึ้น */
+.tabs{border-bottom:1.5px solid var(--line2)}
+.tab{font-size:14px}
+/* focus card: จัดกลางแนวตั้ง + สูงเท่ากัน + ตัวเลขเข้ม navy */
+.focus-card{min-height:96px;display:flex;flex-direction:column;justify-content:center;border-left-width:4px}
+.focus-n{color:var(--navy);font-size:32px}
+.focus-l{font-size:12.5px}
+/* bar เห็นชัด: track เข้มขึ้น + fill มี min-width + ตัวหนา */
+.bar-track{background:#C2D0DD;height:18px}
+.bar-label{font-size:13px}
+.bar-n{font-size:13px;font-weight:600}
+/* วันในตาราง: สม่ำเสมอ — soon=แดงเข้ม ปกติ=navy (ไม่ดำจืด) */
+.dl{color:var(--navy);font-weight:500}
+/* panel หัวข้อเข้มคม */
+.panel h3{color:var(--teal-d);font-size:12px;font-weight:700}
+/* table header เข้ม อ่านชัด */
+thead th{color:var(--ink2);font-size:11px;background:#F0F5F9}
+.task-cell{font-size:14px}
+tbody td{font-size:13.5px}
+/* group row เข้ม */
+.grp-row td{background:#EEF4F9;font-size:13px;color:var(--navy)}
+
+/* ═══ มือถือจริง (≤560): การ์ดแทนตาราง + ไม่อัด ═══ */
+@media(max-width:560px){
+  .app{padding:0 12px 50px}
+  .topbar{flex-wrap:wrap;gap:8px}
+  .toolbar{gap:6px}
+  .toolbar .sel select{padding:9px 26px 9px 10px;font-size:12.5px}
+  .search{order:10;min-width:100%}
+  /* focus grid ยังเป็น 2 คอลัมน์แต่สูงพอ */
+  .focus-grid{gap:9px}
+  .focus-n{font-size:27px}
+  /* ปุ่ม/ป้ายใหญ่พอแตะ */
+  .btn-primary,.btn-ghost{padding:9px 13px;font-size:13px}
+/* ปุ่ม toggle กระชับ (show/hide completed & timeline) */
+.tgl{display:inline-flex;align-items:center;background:var(--panel);border:1px solid var(--line2);color:var(--ink2);font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tgl:hover{border-color:var(--teal);color:var(--teal)}
+.tgl.off{background:var(--teal);color:#fff;border-color:var(--teal)}
+.tgl-group{display:inline-flex;gap:8px;align-items:center}
+  .cal-cell{min-height:52px;padding:5px}
+  .cal-ev{font-size:11px}
+}
+
+/* ===== Client View (รายงานลูกค้า) ===== */
+.cv-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px}
+.cv-bar-l{display:flex;align-items:center;gap:14px}
+.cv-bar-t{font-size:18px;font-weight:800;color:var(--ink)}
+.cv-bar-r{display:flex;gap:9px}
+#cvReport{max-width:640px;margin:0 auto}
+.cv-doc{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 40px rgba(10,31,51,.14)}
+.cv-hero{background:linear-gradient(135deg,#081826 0%,#0F2C44 55%,#0A4A57 100%);color:#fff;padding:32px 36px;position:relative;overflow:hidden}
+.cv-hero::before{content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(8,181,199,.18),transparent 70%)}
+.cv-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(95,211,232,.5),transparent)}
+.cv-htop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;position:relative;z-index:2}
+.cv-hlogo{display:flex;align-items:center;gap:11px}
+.cv-hlogo .q{width:42px;height:42px;background:linear-gradient(135deg,#0891A5,#12C7DB);border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:21px;box-shadow:0 6px 18px rgba(18,199,219,.45)}
+.cv-hlogo .nm{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.cv-hbadge{text-align:right}
+.cv-hbadge .bt{font-size:9px;color:#5FD3E8;letter-spacing:.14em;font-weight:600}
+.cv-hbadge .bd{font-size:11px;color:#B8C7D6;margin-top:3px}
+.cv-hclient{font-size:26px;font-weight:800;letter-spacing:-.02em;position:relative;z-index:2}
+.cv-hmeta{font-size:12px;color:#8CA3B8;margin-top:6px;position:relative;z-index:2;display:flex;gap:14px;align-items:center}
+.cv-hdot{width:6px;height:6px;border-radius:50%;background:#1FB06A}
+.cv-summary{display:flex;background:#F4F8FB;border-bottom:1px solid #E4ECF3}
+.cv-sm{flex:1;padding:16px 18px;text-align:center;border-right:1px solid #E4ECF3}
+.cv-sm:last-child{border:none}
+.cv-sm-n{font-size:22px;font-weight:800;color:#0A1F33}
+.cv-sm-n.g{color:#1F9D5A}.cv-sm-n.a{color:#D89311}.cv-sm-n.b{color:#0891A5}
+.cv-sm-l{font-size:9.5px;color:#7A8B9C;text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+.cv-deal{padding:22px 36px;border-bottom:1px solid #F0F4F8}
+.cv-dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cv-dtitle{display:flex;align-items:center;gap:10px}
+.cv-dtitle .ac{width:5px;height:22px;background:linear-gradient(180deg,#0891A5,#12C7DB);border-radius:3px}
+.cv-dtitle .dn{font-size:16px;font-weight:800;color:#0A1F33;letter-spacing:-.01em}
+.cv-dstatus{display:flex;align-items:center;gap:11px}
+.cv-ring{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cv-ring i{width:41px;height:41px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#0A1F33;font-style:normal}
+.cv-tag{padding:5px 12px;border-radius:13px;font-size:10.5px;font-weight:700}
+.cv-tag.g{background:#E3F5EB;color:#1F9D5A}.cv-tag.a{background:#FDF2DD;color:#B8860B}
+.cv-act{display:flex;align-items:flex-start;gap:11px;padding:10px 14px;border-radius:10px;background:#F8FAFC;margin-bottom:7px}
+.cv-aic{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.cv-aic.done{background:#1F9D5A}.cv-aic.prog{background:#0891A5}.cv-aic.next{background:#B0BAC6}.cv-aic.sched{background:#5B7CA8}
+.cv-atext{flex:1;font-size:12.5px;color:#1E3348;line-height:1.4}
+.cv-astat{font-size:10px;margin-top:3px;font-weight:600}
+.cv-astat.done{color:#1F9D5A}.cv-astat.prog{color:#0891A5}.cv-astat.next{color:#8595A6}.cv-astat.sched{color:#5B7CA8}
+.cv-await{margin:0 36px 22px;padding:16px 18px;background:linear-gradient(135deg,#FFFAF0,#FEF4DF);border:1.5px solid #F0DBA0;border-radius:12px;position:relative;overflow:hidden}
+.cv-await::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#E8A317,#D89311)}
+.cv-awh{font-size:11.5px;font-weight:800;color:#A87200;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.cv-awi{display:flex;align-items:flex-start;gap:9px;padding:6px 0;border-bottom:1px dashed #EAD5A0;font-size:12px;color:#5C4A18}
+.cv-awi:last-child{border:none}
+.cv-awi .an{font-weight:700;color:#8B6914;min-width:100px}
+.cv-awi .ar{color:#C99A2E;font-weight:700}
+.cv-foot{padding:18px 36px;background:#0A1F33;color:#8CA3B8;text-align:center;font-size:11px;letter-spacing:.08em}
+.cv-empty{text-align:center;padding:60px 20px;color:var(--ink3)}
+</style>
+</head><body>
+<!-- ═══ Login Gate ═══ -->
+<div id="loginGate" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#081826,#0F2C44 60%,#0A4A57);display:flex;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:18px;padding:40px 36px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center">
+    <div style="width:56px;height:56px;background:linear-gradient(135deg,#0891A5,#12C7DB);border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;color:#fff;margin:0 auto 18px;box-shadow:0 8px 20px rgba(18,199,219,.4)">Q</div>
+    <div style="font-size:19px;font-weight:800;color:#0A1F33;letter-spacing:-.01em">QANVAS CAPITAL</div>
+    <div style="font-size:12px;color:#8595A6;margin-top:4px;margin-bottom:22px">Enter access code to continue</div>
+    <input id="loginInput" type="password" placeholder="Access code" style="width:100%;padding:12px 14px;border:1.5px solid #DCE4EC;border-radius:10px;font-size:14px;outline:none;text-align:center;letter-spacing:.1em" onkeydown="if(event.key==='Enter')checkLogin()">
+    <div id="loginErr" style="color:#D64545;font-size:12px;margin-top:8px;height:16px"></div>
+    <button onclick="checkLogin()" style="width:100%;margin-top:12px;padding:12px;background:linear-gradient(135deg,#0891A5,#0AB5C7);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">Enter</button>
+  </div>
+</div>
+<script>
+function checkLogin(){
+  var v=document.getElementById('loginInput').value.trim();
+  if(v==='qv168'){ document.getElementById('loginGate').style.display='none'; try{sessionStorage.setItem('qvAuth','1');}catch(e){} }
+  else{ document.getElementById('loginErr').textContent='Incorrect code'; document.getElementById('loginInput').value=''; }
+}
+try{ if(sessionStorage.getItem('qvAuth')==='1'){ document.addEventListener('DOMContentLoaded',function(){var g=document.getElementById('loginGate');if(g)g.style.display='none';}); } }catch(e){}
+</script>
+<div class="app">
+  <!-- ═══ [บล็อก 3] โครงหน้า (HTML) ═══ -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">Q</div>
+      <div><div class="bt">Qanvas Tracker</div><div class="bs">Capital Advisory</div></div>
+    </div>
+    <div class="topright">
+      <div class="sync-chip"><span class="sync-dot"></span><span id="syncText">Loading…</span></div>
+      <button id="helpBtn" class="help-btn" title="How to read this app">?</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-page="table"><span data-i18n="nav_table">Tasks</span></button>
+    <button class="tab" data-page="dashboard"><span data-i18n="nav_dash">Dashboard</span></button>
+    <button class="tab" data-page="calendar"><span data-i18n="nav_cal">Calendar</span></button>
+    <button class="tab" data-page="customer"><span data-i18n="nav_cust">Clients</span></button>
+    <button class="tab" data-page="clientview"><span>Client View</span></button>
+    <div style="flex:1"></div>
+    <a href="#" id="guideLink" class="tab" style="color:var(--teal-d);font-weight:600" data-i18n="nav_guide">Open sheet</a>
+  </div>
+
+  <!-- ===== หน้า: ตาราง ===== -->
+  <div id="page-table" class="page">
+    <div class="toolbar">
+      <div class="sel"><select id="fDivision"></select></div>
+      <div class="sel"><select id="fClient"></select></div>
+      <div class="sel"><select id="fDeal"></select></div>
+      <div class="sel"><select id="fStatus"></select></div>
+      <div class="sel"><select id="fOwner"></select></div>
+      <div class="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93A6B6" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+        <input id="fSearch" type="text" data-i18n-ph="ph_search" placeholder="Search tasks...">
+      </div>
+      <button class="btn-primary" id="btnSummary"><span data-i18n="btn_summary">Summary</span></button>
+      <div class="viewtog"><button id="viewTable" class="on" data-i18n="view_table">Table</button><button id="viewCards" data-i18n="view_cards">Cards</button></div>
+      <div class="tgl-group">
+        <button class="tgl" id="toggleDone"><span id="toggleDoneLbl">Hide completed</span></button>
+        <button class="tgl" id="toggleTimeline"><span id="toggleTimelineLbl">Hide timeline</span></button>
+      </div>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div id="tableView" class="tbl-wrap"></div>
+    <div id="cardsView" class="cards hidden"></div>
+  </div>
+
+  <!-- ===== หน้า: Dashboard ===== -->
+  <div id="page-dashboard" class="page hidden">
+    <div class="dash-h" data-i18n="dash_title">Dashboard — Decision Overview</div>
+    <div class="dash-sub" data-i18n="dash_sub">Calculated from the master table</div>
+    <div class="focus-grid" id="focusGrid"></div>
+    <div class="dash-cols">
+      <div class="panel"><h3 data-i18n="dash_status">Tasks by Status</h3><div id="dashStatus"></div></div>
+      <div class="panel"><h3 data-i18n="dash_people">Tasks by Person (active)</h3><div id="dashPeople"></div></div>
+    </div>
+    <div class="panel"><h3 data-i18n="dash_division">Tasks by Division (active)</h3><div id="dashDivision"></div></div>
+  </div>
+
+  <!-- ===== หน้า: ปฏิทิน ===== -->
+  <div id="page-calendar" class="page hidden">
+    <div class="cal-head">
+      <div class="cal-title" id="calTitle"></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn-ghost" id="calPrev">‹</button>
+        <button class="btn-ghost" id="calNext">›</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-hint" id="calHint"></div>
+    <div class="cal-detail hidden" id="calDetail"></div>
+  </div>
+
+  <!-- ===== หน้า: ลูกค้า ===== -->
+  <div id="page-customer" class="page hidden">
+    <div class="cust-head">
+      <div class="cust-name">Client Timeline</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="tgl-group">
+          <button class="tgl" id="custToggleDone"><span id="custToggleDoneLbl">Hide completed</span></button>
+          <button class="tgl" id="custToggleTimeline"><span id="custToggleTimelineLbl">Hide timeline</span></button>
+        </div>
+        <div class="sel"><select id="custSelect"></select></div>
+      </div>
+    </div>
+    <div id="custTimeline"></div>
+  </div>
+
+  <!-- ===== หน้า Client View (รายงานลูกค้า) ===== -->
+  <div id="page-clientview" class="page hidden">
+    <div class="cv-bar">
+      <div class="cv-bar-l">
+        <span class="cv-bar-t">Client Report</span>
+        <div class="sel"><select id="cvSelect"></select></div>
+      </div>
+      <div class="cv-bar-r">
+        <button class="btn-ghost" id="cvExportPng">Export PNG</button>
+        <button class="btn-primary" id="cvExportPdf">Export PDF</button>
+      </div>
+    </div>
+    <div id="cvReport"></div>
+  </div>
+</div>
+
+<!-- ===== modal สรุป ===== -->
+<div id="summaryModal" class="modal-bg hidden">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 data-i18n="sum_title">Summary — copy to chat</h3>
+      <button class="modal-close" id="sumClose">×</button>
+    </div>
+    <div class="seg">
+      <button data-range="week" class="on" data-i18n="sum_week">This Week</button>
+      <button data-range="month" data-i18n="sum_month">This Month</button>
+      <button data-range="nextmonth" data-i18n="sum_nextmonth">Next Month</button>
+    </div>
+    <div class="summary-pre" id="summaryText"></div>
+    <div class="modal-foot">
+      <button class="btn-primary" id="btnCopy" style="flex:1;justify-content:center"><span data-i18n="btn_copy">Copy</span></button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== modal คู่มือการดูแอป ===== -->
+<div id="helpModal" class="modal-bg hidden">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="helpTitle">How to read this app</h3>
+      <button class="modal-close" id="helpClose">×</button>
+    </div>
+    <div style="padding:18px" id="helpBody"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   [บล็อก 1] ตั้งค่า (CONFIG)
+   เชื่อม Google Sheet จริง: ใส่ URL CSV ที่ publish แล้ว
+   ตอนนี้ว่าง = ใช้ข้อมูลเดโมฝังในแอป (บล็อก 4)
+   ═══════════════════════════════════════════════════════════ */
+const CONFIG = {
+  GOOGLE_SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRt_yrBWhh8Y0vzC7WxBtuLIi9z3hmYunPZGSiCQufjt-DPAgvzH4N2RaDygRNiaoopRcFDrdUBiIRc/pub?gid=111634058&single=true&output=csv",   // ← ใส่ลิงก์ CSV จาก Google Sheet ตรงนี้
+  POLL_SECONDS: 15,
+  GUIDE_URL: "https://docs.google.com/spreadsheets/d/17UF94COeRiEmFR6_D-LdsZBP_DhzHHrPMZmMC93cij8/edit?gid=111634058",             // ← ใส่ลิงก์ Google Sheet ตรงนี้ (คนกด "เปิดชีต" เพื่อไปแก้ข้อมูล)
+  TODAY: new Date().toISOString().slice(0,10)        // วันนี้ (เดโม) — ต่อชีตจริงใช้ new Date()
+};
+
+/* ═══ [บล็อก 4] ข้อมูลตัวอย่าง (22 เคสจากชีต v7) ═══ */
+const DEMO_DATA = [];  // แอปใช้ข้อมูลจากชีตเท่านั้น
+
+/* ═══ [บล็อก 5] เชื่อม Google Sheet (poll) ═══
+   ถ้ามี CSV URL → ดึงจากชีต; ถ้าไม่มี → ใช้ DEMO_DATA */
+let STATE = { rows: [], lang: 'en', page: 'table', view: 'table',
+  filters: {division:'',client:'',deal:'',status:'',owner:'',search:''},
+  collapsed: {}, calMonth: 6, calYear: 2026, custClient: '', sumRange: 'week', hideDone: false, hideTimeline: false, calSelDate: '', custHideDone: false, custHideTimeline: false, cvClient: '' };
+
+async function loadData(){
+  if(!CONFIG.GOOGLE_SHEET_CSV_URL){
+    STATE.rows = [];
+    document.getElementById('syncText').textContent = '⚠️ Sheet URL not set';
+    render(); return;
+  }
+  const sc=document.getElementById('syncText');
+  try{
+    const res = await fetch(CONFIG.GOOGLE_SHEET_CSV_URL);
+    if(!res.ok){ sc.textContent='⚠️ Sheet error (HTTP '+res.status+')'; STATE.rows=[]; render(); return; }
+    const txt = await res.text();
+    const parsed = parseCSV(txt);
+    STATE.rows = parsed;  // ชีตมีอะไร แอปแสดงตามนั้น (ว่างก็ว่างตาม)
+    const t = new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+    sc.textContent = 'Synced '+t+' · '+parsed.length+' tasks';
+    render();
+  }catch(e){ sc.textContent='⚠️ Sheet error: '+(e.message||'network/CORS'); STATE.rows = []; render(); }
+}
+// map หัวคอลัมน์ชีต → key ในแอป (ปรับได้ถ้าหัวชีตต่าง)
+const COLUMN_MAP = {'Division':'division','Client':'client','Deal':'deal','Sub-Project':'subProject','Task':'task','Priority':'priority','Status':'status','Next Step':'nextStep','Owner':'owner','Counterparty':'counterparty','Deadline':'deadline','Timeframe':'timeframe','RAG':'rag','Date Completed':'dateCompleted','Verify?':'verify','Remarks':'remarks','Client-view':'clientView','Client-message':'clientMessage'};
+function parseCSV(txt){
+  const lines=txt.split(/\r?\n/).filter(l=>l.trim());
+  if(!lines.length) return [];
+  const heads=splitCSVLine(lines[0]);
+  return lines.slice(1).map(line=>{
+    const cells=splitCSVLine(line); const o={};
+    heads.forEach((h,i)=>{ const k=COLUMN_MAP[h.trim()]; if(k) o[k]=(cells[i]||'').trim(); });
+    // แปลงวันที่จาก Google (M/D/YYYY) เป็น YYYY-MM-DD ที่แอปใช้
+    o.deadline=normDate(o.deadline);
+    o.dateCompleted=normDate(o.dateCompleted);
+    return o;
+  }).filter(r=>r.client||r.task);
+}
+// normalize วันที่ทุกรูปแบบ → YYYY-MM-DD (รองรับ M/D/YYYY จาก Google Sheets)
+function normDate(v){
+  if(!v) return '';
+  v=v.trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;           // YYYY-MM-DD อยู่แล้ว
+  const m=v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);   // M/D/YYYY (รูปแบบ Google)
+  if(m){ const mo=m[1].padStart(2,'0'), d=m[2].padStart(2,'0'); return `${m[3]}-${mo}-${d}`; }
+  return v;  // รูปแบบอื่น (เช่น Timeframe text) คงไว้
+}
+function splitCSVLine(line){
+  const out=[];let cur='';let q=false;
+  for(let i=0;i<line.length;i++){const c=line[i];
+    if(c==='"'){ if(q&&line[i+1]==='"'){cur+='"';i++;} else q=!q; }
+    else if(c===','&&!q){out.push(cur);cur='';}
+    else cur+=c;
+  } out.push(cur); return out;
+}
+
+/* ═══ [บล็อก 6] ตรรกะแอป (JS) ═══ */
+// ---------- i18n ----------
+const I18N={
+  th:{nav_table:'งาน',nav_dash:'Dashboard',nav_cal:'ปฏิทิน',nav_cust:'ลูกค้า',nav_guide:'เปิดชีต ↗',
+    ph_search:'ค้นหางาน...',btn_summary:'สรุป',view_table:'ตาราง',view_cards:'การ์ด',
+    dash_title:'Dashboard — ภาพรวมเพื่อการตัดสินใจ',dash_sub:'คำนวณจากตารางหลักอัตโนมัติ',
+    dash_status:'งานตาม Status',dash_people:'งานแยกตามคน (ที่ยังทำอยู่)',dash_division:'งานตาม Division (ที่ยังทำอยู่)',
+    cust_title:'ไทม์ไลน์รายลูกค้า',sum_title:'สรุปงาน — คัดลอกไปวางแชท',
+    sum_week:'สัปดาห์นี้',sum_month:'เดือนนี้',sum_nextmonth:'เดือนหน้า',btn_copy:'คัดลอก',
+    all_div:'ทุก Division',all_client:'ทุก Client',all_deal:'ทุก Deal',all_status:'ทุก Status',all_owner:'ทุก Owner',
+    clear_all:'ล้างทั้งหมด',focus_risk:'เสี่ยงสูง — RAG แดง ที่ยังไม่เสร็จ',focus_wait:'รอปัจจัยภายนอก (Waiting)',
+    focus_block:'ติดอุปสรรค (Blocked)',focus_verify:'ตัวเลขต้อง Verify',
+    col_rag:'RAG',col_task:'Task',col_sub:'Sub-Project',col_pri:'Pri',col_status:'Status',col_owner:'Owner',col_deadline:'Deadline',
+    copied:'คัดลอกแล้ว!',no_tasks:'ไม่มีงานในช่วงนี้',people_note:'รับงานเยอะสุด — พิจารณากระจายงาน',
+    sum_head:'สรุปงาน',open_tasks:'งานเปิด',urgent:'เร่ง',waiting_ext:'รอภายนอก',cust_copy:'คัดลอกสรุปลูกค้า',unit_task:'งาน',no_deal:'งานทั่วไป',show_done:'แสดงงานเสร็จ',hide_done:'ซ่อนงานเสร็จ',open_sheet:'เปิดชีต',
+    cal_hint:'คลิกวันที่มีงาน เพื่อดูรายละเอียด',cal_pick:'เลือกวันที่มีงานในปฏิทิน',cal_client:'ลูกค้า',cal_deal:'ดีล',cal_owner:'ผู้รับผิดชอบ',cal_status:'สถานะ',cal_next:'ก้าวถัดไป',cal_close:'ปิด',cust_all_done:'ไม่มีงานที่ยังเปิดอยู่ — กด “แสดงงานเสร็จ” เพื่อดูงานที่ทำไปแล้ว',tl_next:'ถัดไป',hide_timeline:'ซ่อนไทม์ไลน์',show_timeline:'แสดงไทม์ไลน์'},
+  en:{nav_table:'Tasks',nav_dash:'Dashboard',nav_cal:'Calendar',nav_cust:'Clients',nav_guide:'Open sheet ↗',
+    ph_search:'Search tasks...',btn_summary:'Summary',view_table:'Table',view_cards:'Cards',
+    dash_title:'Dashboard — Decision Overview',dash_sub:'Calculated from the master table',
+    dash_status:'Tasks by Status',dash_people:'Tasks by Person (active)',dash_division:'Tasks by Division (active)',
+    cust_title:'Client Timeline',sum_title:'Summary — copy to chat',
+    sum_week:'This Week',sum_month:'This Month',sum_nextmonth:'Next Month',btn_copy:'Copy',
+    all_div:'All Divisions',all_client:'All Clients',all_deal:'All Deals',all_status:'All Status',all_owner:'All Owners',
+    clear_all:'Clear all',focus_risk:'High risk — Red, not done',focus_wait:'Waiting (external)',
+    focus_block:'Blocked',focus_verify:'Numbers to verify',
+    col_rag:'RAG',col_task:'Task',col_sub:'Sub-Project',col_pri:'Pri',col_status:'Status',col_owner:'Owner',col_deadline:'Deadline',
+    copied:'Copied!',no_tasks:'No tasks in this range',people_note:'has the most — consider rebalancing',
+    sum_head:'Task Summary',open_tasks:'open',urgent:'urgent',waiting_ext:'waiting',cust_copy:'Copy client summary',unit_task:'tasks',no_deal:'General',show_done:'Show completed',hide_done:'Hide completed',open_sheet:'Open sheet',
+    cal_hint:'Click a day with tasks to see details',cal_pick:'Select a day with tasks',cal_client:'Client',cal_deal:'Deal',cal_owner:'Owner',cal_status:'Status',cal_next:'Next step',cal_close:'Close',cust_all_done:'No open tasks — tap “Show completed” to see finished work',tl_next:'Next',hide_timeline:'Hide timeline',show_timeline:'Show timeline'}
+};
+const t = k => (I18N[STATE.lang][k]||k);
+
+const HELP={
+ th:{title:'คู่มือการดูแอป',body:`
+  <div class="help-section">
+   <h4>📊 4 การ์ดบนสุด (Dashboard) — "ต้องโฟกัสอะไร"</h4>
+   <p><span class="help-tag" style="background:var(--red-bg);color:var(--red)">เสี่ยงสูง</span> งานที่ RAG=แดง และยังไม่เสร็จ — เสี่ยงพลาด/เกินกำหนด ต้องรีบ</p>
+   <p><span class="help-tag" style="background:var(--amber-bg);color:var(--amber)">Waiting</span> รอปัจจัย<b>ภายนอก</b> (ลูกค้า/แบงก์) — เรารอเขา</p>
+   <p><span class="help-tag" style="background:var(--purple-bg);color:#6D3FC4">Blocked</span> ติดอุปสรรคที่<b>ทีมต้องแก้เอง</b> — เราต้องลงมือ</p>
+   <p><span class="help-tag" style="background:var(--teal-bg);color:var(--teal-d)">Verify</span> ตัวเลขยังไม่นิ่ง ต้อง reconcile</p>
+   <p style="color:var(--ink3);font-size:11.5px;margin-top:5px">💡 งานเกินกำหนด = RAG แดงอัตโนมัติ → อยู่ในการ์ด "เสี่ยงสูง" แล้ว</p>
+  </div>
+  <div class="help-section">
+   <h4>🎨 สีแถบซ้ายการ์ด = RAG (ความเสี่ยง ไม่ใช่สถานะ)</h4>
+   <p><span class="help-tag" style="background:var(--red-bg);color:var(--red)">แดง</span>เสี่ยง/เกินกำหนด &nbsp;<span class="help-tag" style="background:var(--amber-bg);color:var(--amber)">เหลือง</span>เฝ้าระวัง &nbsp;<span class="help-tag" style="background:var(--green-bg);color:#1F7A4D">เขียว</span>ปกติ</p>
+   <p style="color:var(--ink3);font-size:11.5px">สถานะงาน (Not Started/In Progress/Done...) ดูที่ป้ายในการ์ด ไม่ใช่สีแถบ</p>
+  </div>
+  <div class="help-section">
+   <h4>📄 แต่ละหน้าดึงข้อมูลจากไหนในชีต (แท็บ Master Tracker)</h4>
+   <p style="font-size:11.5px;color:var(--ink3);margin-bottom:6px">ทุกหน้าดึงจากแท็บ <b>Master Tracker</b> — ตารางล่างบอกว่าแต่ละส่วนใช้คอลัมน์ไหน</p>
+   <table class="help-tbl">
+    <tr><th>หน้า / ส่วนในแอป</th><th>คอลัมน์ในชีต</th></tr>
+    <tr><td><b>Dashboard</b> · เสี่ยงสูง</td><td class="mono-s">RAG=แดง + Status≠Done/Dropped</td></tr>
+    <tr><td><b>Dashboard</b> · Waiting</td><td class="mono-s">Status=Waiting</td></tr>
+    <tr><td><b>Dashboard</b> · Blocked</td><td class="mono-s">Status=Blocked</td></tr>
+    <tr><td><b>Dashboard</b> · Verify</td><td class="mono-s">Verify?=Yes</td></tr>
+    <tr><td><b>Dashboard</b> · แท่ง Status/คน/Division</td><td class="mono-s">Status / Owner / Division</td></tr>
+    <tr><td><b>งาน (Tasks)</b> · จัดกลุ่ม</td><td class="mono-s">Client › Deal</td></tr>
+    <tr><td><b>งาน</b> · แถว/การ์ด</td><td class="mono-s">Task, Sub-Project, Priority, Status, Owner, Deadline, RAG</td></tr>
+    <tr><td><b>ปฏิทิน (Calendar)</b></td><td class="mono-s">Deadline (เฉพาะงานที่มีวัน)</td></tr>
+    <tr><td><b>ลูกค้า (Clients)</b></td><td class="mono-s">Client → จัดกลุ่ม Deal → Task/Status/Deadline</td></tr>
+   </table>
+   <p style="font-size:11.5px;color:var(--ink3);margin-top:6px">Done/Dropped ซ่อนอัตโนมัติ — กด "แสดงงานเสร็จ" เพื่อดู</p>
+  </div>
+  <div class="help-section">
+   <h4>🔗 ข้อมูลมาจากไหน / แก้ตรงไหน</h4>
+   <p>แอปนี้<b>แสดงผลอย่างเดียว</b> (ดึงจาก Google Sheet) — แก้/เพิ่มงานทำใน<b>ชีต</b> แล้วแอปอัพเดตตาม</p>
+   <p>กดปุ่ม <b>"เปิดชีต ↗"</b> มุมขวาบน เพื่อไปแก้ข้อมูลในชีต</p>
+  </div>`},
+ en:{title:'How to Read This App',body:`
+  <div class="help-section">
+   <h4>📑 Pages <span style="color:var(--ink3);font-weight:400;font-size:11.5px">(left to right)</span></h4>
+   <p><b>Tasks</b> — all active work, grouped by Client › Deal</p>
+   <p><b>Dashboard</b> — priorities & workload at a glance</p>
+   <p><b>Calendar</b> — tasks by deadline date</p>
+   <p><b>Clients</b> — timeline per client</p>
+   <p><b>Client View</b> — client-ready report (export PDF/PNG)</p>
+  </div>
+  <div class="help-section">
+   <h4>🎨 Card bar color = Risk (RAG)</h4>
+   <p><span class="help-tag" style="background:var(--red-bg);color:var(--red)">Red</span>at risk / overdue &nbsp;<span class="help-tag" style="background:var(--amber-bg);color:var(--amber)">Amber</span>watch &nbsp;<span class="help-tag" style="background:var(--green-bg);color:#1F7A4D">Green</span>on track</p>
+   <p style="color:var(--ink3);font-size:11.5px">Status (In Progress / Done…) is the label inside the card</p>
+  </div>
+  <div class="help-section">
+   <h4>📌 Dashboard focus cards</h4>
+   <p><span class="help-tag" style="background:var(--red-bg);color:var(--red)">High Risk</span> Red & unfinished, act now</p>
+   <p><span class="help-tag" style="background:var(--amber-bg);color:var(--amber)">Waiting</span> on an external party (client/bank)</p>
+   <p><span class="help-tag" style="background:var(--purple-bg);color:#6D3FC4">Blocked</span> the team must fix it</p>
+   <p><span class="help-tag" style="background:var(--teal-bg);color:var(--teal-d)">Verify</span> figures not yet confirmed</p>
+  </div>
+  <div class="help-section">
+   <h4>🔗 Data</h4>
+   <p>Read-only mirror of the Google Sheet. Edit in the sheet (<b>Open sheet ↗</b>) — the app updates automatically.</p>
+  </div>`}
+};
+
+const MONTHS_TH=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const MONTHS_EN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent=t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder=t(el.dataset.i18nPh); });
+  syncToggleBtns();
+}
+// ปุ่ม toggle 4 ตัว (Tasks + Clients) — label + สถานะ .off สะท้อน state
+function syncToggleBtns(){
+  const set=(btnId,lblId,hidden,showTxt,hideTxt)=>{
+    const b=document.getElementById(btnId), l=document.getElementById(lblId);
+    if(l) l.textContent=hidden?showTxt:hideTxt;
+    if(b) b.classList.toggle('off',hidden);
+  };
+  set('toggleDone','toggleDoneLbl',STATE.hideDone,'Show completed','Hide completed');
+  set('toggleTimeline','toggleTimelineLbl',STATE.hideTimeline,'Show timeline','Hide timeline');
+  set('custToggleDone','custToggleDoneLbl',STATE.custHideDone,'Show completed','Hide completed');
+  set('custToggleTimeline','custToggleTimelineLbl',STATE.custHideTimeline,'Show timeline','Hide timeline');
+}
+
+// ---------- helpers ----------
+const STATUS_ACTIVE = r => r.status!=='Done' && r.status!=='Dropped' && r.status!=='Timeline';
+function fmtDate(iso){ if(!iso) return ''; const p=iso.split('-'); return p.length===3?`${p[2]}/${p[1]}`:iso; }
+function isSoon(iso){ if(!iso) return false; const d=new Date(iso), today=new Date(CONFIG.TODAY); const diff=(d-today)/86400000; return diff<=3; }
+function isOverdue(iso,status){ if(!iso||status==='Done'||status==='Dropped'||status==='Timeline') return false; const d=new Date(iso), today=new Date(CONFIG.TODAY); return d < today; }
+function ragClass(r){ const m={Red:'rag-red',Amber:'rag-amber',Green:'rag-green'}; return m[r.rag]||'rag-none'; }
+function statusClass(s){ return 'st-'+(s||'').toLowerCase().replace(/\s/g,''); }
+function hasWarnBlankTime(r){ return !r.deadline && !r.timeframe && r.task; }
+
+// ---------- filters ----------
+function filteredRows(){
+  const f=STATE.filters;
+  return STATE.rows.filter(r=>{
+    // ค่าเริ่มต้นแสดงทั้งหมด; ซ่อนเมื่อผู้ใช้กด Hide (เว้นแต่กรอง Status เจาะจง)
+    if(STATE.hideDone && !f.status && (r.status==='Done'||r.status==='Dropped')) return false;
+    if(STATE.hideTimeline && !f.status && r.status==='Timeline') return false;
+    if(f.division && r.division!==f.division) return false;
+    if(f.client && r.client!==f.client) return false;
+    if(f.deal && r.deal!==f.deal) return false;
+    if(f.status && r.status!==f.status) return false;
+    if(f.owner && r.owner!==f.owner) return false;
+    if(f.search){ const q=f.search.toLowerCase(); const hay=(r.task+' '+r.remarks+' '+r.nextStep+' '+r.subProject).toLowerCase(); if(!hay.includes(q)) return false; }
+    return true;
+  });
+}
+function uniq(key){ return [...new Set(STATE.rows.map(r=>r[key]).filter(v=>v&&v!=='—'))].sort(); }
+
+function buildFilters(){
+  const f=STATE.filters;
+  const set=(id,key,allLabel,opts)=>{
+    const sel=document.getElementById(id);
+    sel.innerHTML=`<option value="">${allLabel}</option>`+opts.map(o=>`<option value="${o}"${f[key]===o?' selected':''}>${o}</option>`).join('');
+    sel.parentElement.classList.toggle('active',!!f[key]);
+  };
+  set('fDivision','division',t('all_div'),uniq('division'));
+  set('fClient','client',t('all_client'),uniq('client'));
+  // cascading: Deal shows only for selected client
+  let deals = STATE.rows.filter(r=>!f.client||r.client===f.client).map(r=>r.deal).filter(v=>v&&v!=='—');
+  set('fDeal','deal',t('all_deal'),[...new Set(deals)].sort());
+  set('fStatus','status',t('all_status'),['Not Started','In Progress','Waiting','Blocked','Done','Dropped']);
+  set('fOwner','owner',t('all_owner'),uniq('owner'));
+}
+function buildChips(){
+  const f=STATE.filters; const el=document.getElementById('chips'); const parts=[];
+  const add=(key,label)=>{ if(f[key]) parts.push(`<span class="chip">${label}: ${f[key]}<button data-clear="${key}">×</button></span>`); };
+  add('division','Division');add('client','Client');add('deal','Deal');add('status','Status');add('owner','Owner');
+  if(f.search) parts.push(`<span class="chip">"${f.search}"<button data-clear="search">×</button></span>`);
+  if(parts.length) parts.push(`<span class="chip chip-clear"><button data-clear="all">${t('clear_all')}</button></span>`);
+  el.innerHTML=parts.join('');
+  el.querySelectorAll('[data-clear]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.clear;
+    if(k==='all') STATE.filters={division:'',client:'',deal:'',status:'',owner:'',search:''};
+    else { STATE.filters[k]=''; if(k==='client') STATE.filters.deal=''; }
+    document.getElementById('fSearch').value=STATE.filters.search;
+    render();
+  });
+}
+
+// ---------- sort: RAG red first → deadline → priority ----------
+const RAG_ORD={Red:0,Amber:1,Green:2,'':3};
+const PRI_ORD={P1:0,P2:1,P3:2,'':3};
+function sortRows(rows){
+  return rows.slice().sort((a,b)=>{
+    if(RAG_ORD[a.rag]!==RAG_ORD[b.rag]) return RAG_ORD[a.rag]-RAG_ORD[b.rag];
+    const ad=a.deadline||'9999', bd=b.deadline||'9999';
+    if(ad!==bd) return ad<bd?-1:1;
+    return (PRI_ORD[a.priority]||3)-(PRI_ORD[b.priority]||3);
+  });
+}
+
+// ---------- render: TABLE (grouped by Client › Deal) ----------
+function renderTable(){
+  const rows=sortRows(filteredRows());
+  const wrap=document.getElementById('tableView');
+  if(!rows.length){ wrap.innerHTML=`<div class="empty-note">${t('no_tasks')}</div>`; return; }
+  // group by client › deal
+  const groups={};
+  rows.forEach(r=>{ const key=r.client+' › '+(r.deal&&r.deal!=='—'?r.deal:'—'); (groups[key]=groups[key]||[]).push(r); });
+  let html=`<table><thead><tr><th>${t('col_rag')}</th><th>${t('col_task')}</th><th>${t('col_sub')}</th><th>${t('col_pri')}</th><th>${t('col_status')}</th><th>${t('col_owner')}</th><th>${t('col_deadline')}</th></tr></thead><tbody>`;
+  Object.keys(groups).forEach(gk=>{
+    const collapsed=STATE.collapsed[gk];
+    html+=`<tr class="grp-row${collapsed?' collapsed':''}" data-grp="${gk.replace(/"/g,'')}"><td colspan="7"><span class="grp-caret">▾</span>${gk}<span class="grp-count">${groups[gk].length} ${t('unit_task')}</span></td></tr>`;
+    if(!collapsed) groups[gk].forEach(r=>{
+      const warn=hasWarnBlankTime(r);
+      html+=`<tr>
+        <td><span class="rag ${ragClass(r)}"><span class="rag-dot"></span>${r.rag||'—'}</span></td>
+        <td class="task-cell">${esc(r.task)}</td>
+        <td style="color:var(--ink2)">${esc(r.subProject)||'—'}</td>
+        <td><span class="pri pri-${r.priority}">${r.priority}</span></td>
+        <td><span class="pill ${statusClass(r.status)}">${r.status}</span></td>
+        <td>${esc(r.owner)}</td>
+        <td class="${warn?'warn-cell':''}">${r.deadline?`<span class="dl ${isOverdue(r.deadline,r.status)?'dl-soon':''}">${fmtDate(r.deadline)}</span>`:(r.timeframe?`<span class="tf-tag">${r.timeframe}</span>`:'<span style="color:var(--amber);font-weight:600">⚠ No date</span>')}</td>
+      </tr>`;
+    });
+  });
+  html+='</tbody></table>';
+  wrap.innerHTML=html;
+  wrap.querySelectorAll('.grp-row').forEach(gr=>gr.onclick=()=>{ const k=gr.dataset.grp; STATE.collapsed[k]=!STATE.collapsed[k]; renderTable(); });
+}
+
+// ---------- render: CARDS ----------
+function renderCards(){
+  const rows=sortRows(filteredRows());
+  const el=document.getElementById('cardsView');
+  if(!rows.length){ el.innerHTML=`<div class="empty-note">${t('no_tasks')}</div>`; return; }
+  el.innerHTML=rows.map(r=>`
+    <div class="card rl-${(r.rag||'').toLowerCase()}">
+      <div class="card-top"><div class="card-task">${esc(r.task)}</div><span class="pri pri-${r.priority}">${r.priority}</span></div>
+      <div class="card-meta">${esc(r.client)}${r.deal&&r.deal!=='—'?' › '+esc(r.deal):''}</div>
+      <div class="card-meta" style="color:var(--ink3)">${esc(r.nextStep)}</div>
+      <div class="card-foot">
+        <span class="pill ${statusClass(r.status)}">${r.status}</span>
+        <span class="dl ${isSoon(r.deadline)?'dl-soon':''}">${r.deadline?fmtDate(r.deadline):(r.timeframe||'—')}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ---------- render: DASHBOARD ----------
+function renderDashboard(){
+  const rows=STATE.rows;
+  const active=rows.filter(STATUS_ACTIVE);
+  const cnt=(fn)=>rows.filter(fn).length;
+  const focus=[
+    {c:'red',n:cnt(r=>r.rag==='Red'&&STATUS_ACTIVE(r)),l:t('focus_risk')},
+    {c:'amber',n:cnt(r=>r.status==='Waiting'),l:t('focus_wait')},
+    {c:'purple',n:cnt(r=>r.status==='Blocked'),l:t('focus_block')},
+    {c:'teal',n:cnt(r=>r.verify==='Yes'&&STATUS_ACTIVE(r)),l:t('focus_verify')}
+  ];
+  document.getElementById('focusGrid').innerHTML=focus.map(f=>`<div class="focus-card ${f.c}"><div class="focus-n">${f.n}</div><div class="focus-l">${f.l}</div></div>`).join('');
+  // status bars
+  const statuses=[['Not Started','#64778A'],['In Progress','#0891A5'],['Waiting','#D98207'],['Blocked','#7C4DEF'],['Done','#248A57'],['Dropped','#9AA9B8'],['Timeline','#B0BAC6']];
+  const maxS=Math.max(...statuses.map(([s])=>cnt(r=>r.status===s)),1);
+  document.getElementById('dashStatus').innerHTML=statuses.map(([s,c])=>{
+    const n=cnt(r=>r.status===s); return `<div class="bar-row"><span class="bar-label">${s}</span><span class="bar-track"><span class="bar-fill" style="width:${n/maxS*100}%;background:${c}"></span></span><span class="bar-n">${n}</span></div>`;
+  }).join('');
+  // people
+  const people=[...new Set(active.map(r=>r.owner).filter(Boolean))];
+  const pcount=people.map(p=>[p,active.filter(r=>r.owner===p).length]).sort((a,b)=>b[1]-a[1]);
+  const maxP=Math.max(...pcount.map(x=>x[1]),1);
+  document.getElementById('dashPeople').innerHTML=pcount.map(([p,n])=>`<div class="bar-row"><span class="bar-label">${p}</span><span class="bar-track"><span class="bar-fill" style="width:${n/maxP*100}%;background:#0891A5"></span></span><span class="bar-n">${n}</span></div>`).join('')
+    ;
+  // division
+  const divs=['Finance/Advisory','Accounting','Back Office'];
+  const maxD=Math.max(...divs.map(d=>active.filter(r=>r.division===d).length),1);
+  document.getElementById('dashDivision').innerHTML=divs.map(d=>{const n=active.filter(r=>r.division===d).length;return `<div class="bar-row"><span class="bar-label">${d}</span><span class="bar-track"><span class="bar-fill" style="width:${n/maxD*100}%;background:#0891A5"></span></span><span class="bar-n">${n}</span></div>`;}).join('');
+}
+
+// ---------- render: CALENDAR ----------
+function calEvents(iso){
+  return STATE.rows.filter(r=>r.deadline===iso && (!STATE.hideDone || (r.status!=='Done'&&r.status!=='Dropped')));
+}
+function renderCalendar(){
+  const y=STATE.calYear,m=STATE.calMonth;
+  document.getElementById('calTitle').textContent=MONTHS_EN[m]+' '+y;
+  const first=new Date(y,m,1).getDay();
+  const days=new Date(y,m+1,0).getDate();
+  const dows=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let html=dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<first;i++) html+='<div class="cal-cell empty"></div>';
+  for(let d=1;d<=days;d++){
+    const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const evs=calEvents(iso);
+    const isToday=iso===CONFIG.TODAY;
+    const cls=['cal-cell',isToday?'today':'',evs.length?'has-ev':'',iso===STATE.calSelDate?'sel':''].filter(Boolean).join(' ');
+    html+=`<div class="${cls}"${evs.length?` data-date="${iso}"`:''}><div class="cal-date">${d}</div>`+
+      evs.map(r=>{ const isMeet=/ประชุม|meeting/i.test(r.task); const ec=r.rag==='Red'?'red':(isMeet?'meeting':''); return `<div class="cal-ev ${ec}" title="${esc(r.task)}">${esc(r.task).slice(0,18)}</div>`; }).join('')+'</div>';
+  }
+  const grid=document.getElementById('calGrid');
+  grid.innerHTML=html;
+  grid.querySelectorAll('.cal-cell.has-ev').forEach(c=>c.onclick=()=>{ STATE.calSelDate=(STATE.calSelDate===c.dataset.date?'':c.dataset.date); renderCalendar(); });
+  renderCalDetail();
+}
+function renderCalDetail(){
+  const hint=document.getElementById('calHint'), box=document.getElementById('calDetail');
+  const iso=STATE.calSelDate;
+  const evs=iso?calEvents(iso):[];
+  if(!iso||!evs.length){ box.classList.add('hidden'); box.innerHTML=''; hint.textContent=t('cal_hint'); return; }
+  hint.textContent='';
+  const dt=new Date(iso), dstr=`${dt.getDate()} ${MONTHS_EN[dt.getMonth()]} ${dt.getFullYear()}`;
+  let h=`<div class="cal-detail-head"><span class="cal-detail-date">${dstr}</span><button class="cal-detail-close" id="calDetailClose" aria-label="${t('cal_close')}">✕</button></div>`;
+  evs.forEach(r=>{
+    const rows=[];
+    if(r.client) rows.push([t('cal_client'),esc(r.client)]);
+    if(r.deal&&r.deal!=='—') rows.push([t('cal_deal'),esc(r.deal)]);
+    if(r.owner) rows.push([t('cal_owner'),esc(r.owner)]);
+    rows.push([t('cal_status'),`<span class="pill ${statusClass(r.status)}">${esc(r.status)}</span>`]);
+    if(r.nextStep) rows.push([t('cal_next'),esc(r.nextStep)]);
+    h+=`<div class="cal-task"><div class="cal-task-t">${esc(r.task)}</div><div class="cal-kv">`+
+      rows.map(kv=>`<span class="k">${kv[0]}</span><span class="v">${kv[1]}</span>`).join('')+`</div></div>`;
+  });
+  box.innerHTML=h;
+  box.classList.remove('hidden');
+  document.getElementById('calDetailClose').onclick=()=>{ STATE.calSelDate=''; renderCalendar(); };
+}
+
+// ---------- render: CUSTOMER TIMELINE ----------
+function renderCustomer(){
+  const clients=[...new Set(STATE.rows.map(r=>r.client).filter(Boolean))].sort();
+  if(!STATE.custClient) STATE.custClient=clients[0]||'';
+  const sel=document.getElementById('custSelect');
+  sel.innerHTML=clients.map(c=>`<option value="${c}"${c===STATE.custClient?' selected':''}>${c}</option>`).join('');
+  const allRows=STATE.rows.filter(r=>r.client===STATE.custClient);
+  syncToggleBtns();
+  let rows=allRows;
+  if(STATE.custHideDone) rows=rows.filter(r=>r.status!=='Done'&&r.status!=='Dropped');
+  if(STATE.custHideTimeline) rows=rows.filter(r=>r.status!=='Timeline');
+  const deals={};
+  rows.forEach(r=>{ const d=r.deal&&r.deal!=='—'?r.deal:t('no_deal'); (deals[d]=deals[d]||[]).push(r); });
+  let html='';
+  if(!rows.length){
+    html+=`<div class="tl-empty">${t('cust_all_done')}</div>`;
+  }
+  Object.keys(deals).forEach(d=>{
+    html+=`<div class="deal-block"><div class="deal-title"><span class="dot"></span>${d}</div>`;
+    sortRows(deals[d]).forEach(r=>{
+      const cls=(r.rag||'').toLowerCase();
+      const when=r.deadline?fmtDate(r.deadline):(r.timeframe||'—');
+      const ns=(r.nextStep||'').trim();
+      const nextHtml=ns?`<div class="tl-next"><b>${t('tl_next')}</b> ${esc(ns)}</div>`:`<div class="tl-next empty"><b>${t('tl_next')}</b> –</div>`;
+      html+=`<div class="tl-item ${cls}"><span class="tl-date">${when}</span><span class="tl-mid"><div class="tl-task">${esc(r.task)}</div>${nextHtml}</span><span class="pill ${statusClass(r.status)}">${r.status}</span></div>`;
+    });
+    html+='</div>';
+  });
+  const active=allRows.filter(STATUS_ACTIVE);
+  const urgent=allRows.filter(r=>r.rag==='Red'&&STATUS_ACTIVE(r)).length;
+  const waiting=allRows.filter(r=>r.status==='Waiting').length;
+  const dealAll={};
+  allRows.forEach(r=>{ const d=r.deal&&r.deal!=='—'?r.deal:t('no_deal'); dealAll[d]=(dealAll[d]||0)+1; });
+  html+=`<div class="tl-summary">
+    <div class="tl-sum-t">${STATE.custClient} — ${active.length} ${t('open_tasks')} · ${t('urgent')} ${urgent} · ${t('waiting_ext')} ${waiting}</div>
+    <div class="tl-sum-s">${Object.keys(dealAll).map(d=>d+' '+dealAll[d]).join(', ')}</div>
+    <button class="btn-primary" id="custCopyBtn">${t('cust_copy')}</button>
+  </div>`;
+  document.getElementById('custTimeline').innerHTML=html;
+  document.getElementById('custCopyBtn').onclick=()=>copyText(buildCustomerSummary());
+}
+
+// ---------- Client View (รายงานลูกค้า) ----------
+function isYes(v){ if(!v) return false; const s=String(v).trim().toLowerCase(); return s==='yes'||s==='true'||s==='✓'||s==='y'||s==='1'; }
+function renderClientView(){
+  // เฉพาะงานที่ Client-view = YES
+  const cvRows=STATE.rows.filter(r=>isYes(r.clientView));
+  const clients=[...new Set(cvRows.map(r=>r.client).filter(Boolean))];
+  const sel=document.getElementById('cvSelect');
+  if(!clients.length){
+    sel.innerHTML='';
+    document.getElementById('cvReport').innerHTML=`<div class="cv-empty">No items selected for client view yet<br><span style="font-size:12px">Tick Client-view = YES in the sheet to display items here</span></div>`;
+    return;
+  }
+  if(!STATE.cvClient||!clients.includes(STATE.cvClient)) STATE.cvClient=clients[0];
+  sel.innerHTML=clients.map(c=>`<option value="${esc(c)}"${c===STATE.cvClient?' selected':''}>${esc(c)}</option>`).join('');
+  sel.onchange=e=>{ STATE.cvClient=e.target.value; renderClientView(); };
+
+  const rows=cvRows.filter(r=>r.client===STATE.cvClient);
+  // จัดกลุ่มตามดีล
+  const deals={};
+  rows.forEach(r=>{ const d=r.deal||'General'; (deals[d]=deals[d]||[]).push(r); });
+
+  // สรุปรวม
+  const isDone=r=>r.status==='Done';
+  const isProg=r=>r.status==='In Progress';
+  const isWait=r=>r.status==='Waiting';
+  const nDone=rows.filter(isDone).length, nProg=rows.filter(isProg).length, nWait=rows.filter(isWait).length;
+  const overall=rows.length?Math.round(nDone/rows.length*100):0;
+  const today=new Date(CONFIG.TODAY);
+  const dateStr=today.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+  // สถานะรวมแต่ละดีล (จาก RAG: มีแดง=At Risk)
+  const dealStatus=list=>{ const active=list.filter(r=>STATUS_ACTIVE(r)); if(active.some(r=>(r.rag||'').toLowerCase()==='red')) return 'a'; return 'g'; };
+  const dealPct=list=>{ if(!list.length) return 0; return Math.round(list.filter(isDone).length/list.length*100); };
+
+  let dealsHtml='';
+  Object.keys(deals).forEach(d=>{
+    const list=deals[d];
+    const st=dealStatus(list), pct=dealPct(list);
+    const ringColor=st==='a'?'#D89311':'#1F9D5A';
+    const tagCls=st==='a'?'a':'g', tagTxt=st==='a'?'At Risk':'On Track';
+    let acts='';
+    // แสดงเฉพาะงานที่ไม่ใช่ Waiting (Waiting ไปกล่องล่าง) เรียง Done ก่อน
+    const shown=list.filter(r=>!isWait(r)).sort((a,b)=>{const o={'Done':0,'In Progress':1};return (o[a.status]??2)-(o[b.status]??2);});
+    shown.forEach(r=>{
+      const msg=(r.clientMessage||'').trim()||esc(r.task);
+      let ic='next',sc='next',scT='Upcoming';
+      if(isDone(r)){ic='done';sc='done';scT='Completed'+(r.dateCompleted?' · '+fmtDate(r.dateCompleted):'');}
+      else if(isProg(r)){ic='prog';sc='prog';scT='In Progress'+(r.deadline?' · due '+fmtDate(r.deadline):'');}
+      else if(r.status==='Timeline'){ic='sched';sc='sched';scT='Scheduled'+(r.deadline?' · '+fmtDate(r.deadline):'');}
+      acts+=`<div class="cv-act"><div class="cv-aic ${ic}"></div><div><div class="cv-atext">${esc(msg)}</div><div class="cv-astat ${sc}">${scT}</div></div></div>`;
+    });
+    dealsHtml+=`<div class="cv-deal"><div class="cv-dhead"><div class="cv-dtitle"><div class="ac"></div><div class="dn">${esc(d)}</div></div><div class="cv-dstatus"><div class="cv-ring" style="background:conic-gradient(${ringColor} 0% ${pct}%,#E8EEF4 ${pct}%)"><i>${pct}%</i></div><span class="cv-tag ${tagCls}">${tagTxt}</span></div></div>${acts}</div>`;
+  });
+
+  // กล่อง Awaiting (งาน Waiting)
+  const waits=rows.filter(isWait);
+  let awaitHtml='';
+  if(waits.length){
+    let items='';
+    waits.forEach(r=>{ const msg=(r.clientMessage||'').trim()||esc(r.task); items+=`<div class="cv-awi"><span class="an">${esc(r.deal||'General')}</span><span class="ar">→</span><span>${esc(msg)}</span></div>`; });
+    awaitHtml=`<div class="cv-await"><div class="cv-awh">⏳ Awaiting Your Input</div>${items}</div>`;
+  }
+
+  const onTrackDeals=Object.keys(deals).filter(d=>dealStatus(deals[d])==='g').length;
+  document.getElementById('cvReport').innerHTML=`<div class="cv-doc" id="cvDoc">
+    <div class="cv-hero">
+      <div class="cv-htop"><div class="cv-hlogo"><div class="q">Q</div><div class="nm">QANVAS CAPITAL</div></div><div class="cv-hbadge"><div class="bt">PROGRESS REPORT</div><div class="bd">${dateStr}</div></div></div>
+      <div class="cv-hclient">${esc(STATE.cvClient)}</div>
+      <div class="cv-hmeta"><span><span class="cv-hdot"></span>${onTrackDeals} of ${Object.keys(deals).length} on track</span></div>
+    </div>
+    <div class="cv-summary">
+      <div class="cv-sm"><div class="cv-sm-n g">${nDone}</div><div class="cv-sm-l">Completed</div></div>
+      <div class="cv-sm"><div class="cv-sm-n b">${nProg}</div><div class="cv-sm-l">In Progress</div></div>
+      <div class="cv-sm"><div class="cv-sm-n a">${nWait}</div><div class="cv-sm-l">Awaiting You</div></div>
+      <div class="cv-sm"><div class="cv-sm-n">${overall}%</div><div class="cv-sm-l">Overall</div></div>
+    </div>
+    ${dealsHtml}
+    ${awaitHtml}
+    <div class="cv-foot">Confidential &amp; Proprietary Information</div>
+  </div>`;
+}
+
+// ---------- summaries (copy text) ----------
+function inRange(iso,range){
+  if(!iso) return false;
+  const d=new Date(iso), today=new Date(CONFIG.TODAY);
+  if(range==='week'){ const diff=(d-today)/86400000; return diff>=-7&&diff<=7; }
+  if(range==='month'){ return d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear(); }
+  if(range==='nextmonth'){ const nm=new Date(today.getFullYear(),today.getMonth()+1,1); return d.getMonth()===nm.getMonth()&&d.getFullYear()===nm.getFullYear(); }
+  return false;
+}
+function buildSummary(range){
+  const rows=STATE.rows.filter(r=>inRange(r.deadline,range)&&STATUS_ACTIVE(r));
+  const label={week:t('sum_week'),month:t('sum_month'),nextmonth:t('sum_nextmonth')}[range];
+  if(!rows.length) return `📋 ${t('sum_head')} (${label}) — ${t('no_tasks')}`;
+  const sorted=sortRows(rows);
+  const risk=sorted.filter(r=>r.rag==='Red');
+  const isMeet=r=>/ประชุม|meeting/i.test(r.task);
+  const meet=sorted.filter(isMeet);
+  const other=sorted.filter(r=>r.rag!=='Red'&&!isMeet(r));
+  let s=`📋 ${t('sum_head')} — Qanvas (${label})\n`;
+  if(risk.length){ s+=`\n🔴 ${t('focus_risk')}\n`; risk.forEach(r=>s+=`• ${r.task} — ${fmtDate(r.deadline)} (${r.owner})\n`); }
+  if(meet.length){ s+=`\n📅 Meetings\n`; meet.forEach(r=>s+=`• ${r.task} — ${fmtDate(r.deadline)}\n`); }
+  if(other.length){ s+=`\n📌 Other tasks\n`; other.forEach(r=>s+=`• ${r.task} — ${fmtDate(r.deadline)} (${r.owner})\n`); }
+  s+=`\nTotal ${rows.length} tasks`;
+  return s;
+}
+function buildCustomerSummary(){
+  const rows=STATE.rows.filter(r=>r.client===STATE.custClient&&STATUS_ACTIVE(r));
+  let s=`📋 ${STATE.custClient} — summary\n`;
+  const deals={}; rows.forEach(r=>{const d=r.deal&&r.deal!=='—'?r.deal:'—';(deals[d]=deals[d]||[]).push(r);});
+  Object.keys(deals).forEach(d=>{ s+=`\n● ${d}\n`; sortRows(deals[d]).forEach(r=>{ const w=r.deadline?fmtDate(r.deadline):(r.timeframe||'—'); s+=`• ${r.task} — ${r.status} (${w})\n`; }); });
+  return s;
+}
+function openSummary(){ STATE.sumRange='week'; document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.range==='week')); document.getElementById('summaryText').textContent=buildSummary('week'); document.getElementById('summaryModal').classList.remove('hidden'); }
+function copyText(txt){ navigator.clipboard.writeText(txt).then(()=>toast(t('copied'))); }
+function toast(msg){ const el=document.createElement('div'); el.textContent=msg; el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--teal-d);color:#fff;padding:9px 18px;border-radius:8px;font-size:13.5px;z-index:99;box-shadow:0 4px 16px rgba(0,0,0,.2)'; document.body.appendChild(el); setTimeout(()=>el.remove(),1600); }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// ---------- render dispatcher ----------
+function render(){
+  applyI18n();
+  buildFilters(); buildChips();
+  if(STATE.page==='table'){ if(STATE.view==='table'){renderTable();document.getElementById('tableView').classList.remove('hidden');document.getElementById('cardsView').classList.add('hidden');} else {renderCards();document.getElementById('cardsView').classList.remove('hidden');document.getElementById('tableView').classList.add('hidden');} }
+  if(STATE.page==='dashboard') renderDashboard();
+  if(STATE.page==='calendar') renderCalendar();
+  if(STATE.page==='customer') renderCustomer();
+  if(STATE.page==='clientview') renderClientView();
+}
+
+// ---------- events ----------
+function bindEvents(){
+  document.querySelectorAll('.tab[data-page]').forEach(tab=>tab.onclick=()=>{
+    STATE.page=tab.dataset.page;
+    document.querySelectorAll('.tab[data-page]').forEach(x=>x.classList.toggle('on',x===tab));
+    document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+    document.getElementById('page-'+STATE.page).classList.remove('hidden');
+    render();
+  });
+  // ปุ่ม Export รายงานลูกค้า
+  function loadScript(src){ return new Promise((res,rej)=>{ if(document.querySelector(`script[src="${src}"]`)){res();return;} const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+  async function captureDoc(){
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    const el=document.getElementById('cvDoc');
+    return await html2canvas(el,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+  }
+  const pngBtn=document.getElementById('cvExportPng');
+  const pdfBtn=document.getElementById('cvExportPdf');
+  if(pngBtn) pngBtn.onclick=async()=>{
+    if(!document.getElementById('cvDoc')) return;
+    pngBtn.textContent='...'; try{ const c=await captureDoc(); const a=document.createElement('a'); a.download='Qanvas_Report_'+(STATE.cvClient||'client')+'.png'; a.href=c.toDataURL('image/png'); a.click(); }catch(e){alert('Export ไม่สำเร็จ: '+e.message);} pngBtn.textContent='Export PNG';
+  };
+  if(pdfBtn) pdfBtn.onclick=async()=>{
+    if(!document.getElementById('cvDoc')) return;
+    pdfBtn.textContent='...'; try{
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+      const c=await captureDoc(); const img=c.toDataURL('image/png');
+      const {jsPDF}=window.jspdf; const pdf=new jsPDF('p','mm','a4');
+      const w=210, h=c.height*w/c.width;
+      pdf.addImage(img,'PNG',0,0,w,h,'','FAST');
+      pdf.save('Qanvas_Report_'+(STATE.cvClient||'client')+'.pdf');
+    }catch(e){alert('Export ไม่สำเร็จ: '+e.message);} pdfBtn.textContent='Export PDF';
+  };
+  const fmap={fDivision:'division',fClient:'client',fDeal:'deal',fStatus:'status',fOwner:'owner'};
+  Object.entries(fmap).forEach(([id,key])=>document.getElementById(id).onchange=e=>{ STATE.filters[key]=e.target.value; if(key==='client') STATE.filters.deal=''; render(); });
+  document.getElementById('fSearch').oninput=e=>{ STATE.filters.search=e.target.value; render(); };
+  document.getElementById('viewTable').onclick=()=>{STATE.view='table';document.getElementById('viewTable').classList.add('on');document.getElementById('viewCards').classList.remove('on');render();};
+  document.getElementById('viewCards').onclick=()=>{STATE.view='cards';document.getElementById('viewCards').classList.add('on');document.getElementById('viewTable').classList.remove('on');render();};
+  document.getElementById('toggleDone').onclick=()=>{ STATE.hideDone=!STATE.hideDone; syncToggleBtns(); render(); };
+  document.getElementById('toggleTimeline').onclick=()=>{ STATE.hideTimeline=!STATE.hideTimeline; syncToggleBtns(); render(); };
+  document.getElementById('btnSummary').onclick=openSummary;
+  document.getElementById('sumClose').onclick=()=>document.getElementById('summaryModal').classList.add('hidden');
+  document.getElementById('helpBtn').onclick=()=>{ const h=HELP[STATE.lang]; document.getElementById('helpTitle').textContent=h.title; document.getElementById('helpBody').innerHTML=h.body; document.getElementById('helpModal').classList.remove('hidden'); };
+  document.getElementById('helpClose').onclick=()=>document.getElementById('helpModal').classList.add('hidden');
+  document.getElementById('helpModal').onclick=e=>{ if(e.target.id==='helpModal') e.currentTarget.classList.add('hidden'); };
+  document.getElementById('summaryModal').onclick=e=>{ if(e.target.id==='summaryModal') e.currentTarget.classList.add('hidden'); };
+  document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{ STATE.sumRange=b.dataset.range; document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x===b)); document.getElementById('summaryText').textContent=buildSummary(b.dataset.range); });
+  document.getElementById('btnCopy').onclick=()=>copyText(document.getElementById('summaryText').textContent);
+  document.getElementById('calPrev').onclick=()=>{ STATE.calMonth--; if(STATE.calMonth<0){STATE.calMonth=11;STATE.calYear--;} STATE.calSelDate=''; renderCalendar(); };
+  document.getElementById('calNext').onclick=()=>{ STATE.calMonth++; if(STATE.calMonth>11){STATE.calMonth=0;STATE.calYear++;} STATE.calSelDate=''; renderCalendar(); };
+  document.getElementById('custSelect').onchange=e=>{ STATE.custClient=e.target.value; renderCustomer(); };
+  document.getElementById('custToggleDone').onclick=()=>{ STATE.custHideDone=!STATE.custHideDone; syncToggleBtns(); renderCustomer(); };
+  document.getElementById('custToggleTimeline').onclick=()=>{ STATE.custHideTimeline=!STATE.custHideTimeline; syncToggleBtns(); renderCustomer(); };
+  document.getElementById('guideLink').onclick=e=>{ e.preventDefault(); if(CONFIG.GUIDE_URL&&CONFIG.GUIDE_URL!=='#') window.open(CONFIG.GUIDE_URL,'_blank'); else toast('Set the sheet URL in CONFIG.GUIDE_URL'); };
+}
+
+// ---------- init ----------
+bindEvents();
+loadData();
+if(CONFIG.GOOGLE_SHEET_CSV_URL) setInterval(loadData, CONFIG.POLL_SECONDS*1000);
+</script>
+</body>
+</html>
