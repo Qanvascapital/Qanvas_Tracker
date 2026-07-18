@@ -779,7 +779,11 @@ function buildFilters(){
   // cascading: Deal shows only for selected client
   let deals = STATE.rows.filter(r=>!f.client||r.client===f.client).map(r=>r.deal).filter(v=>v&&v!=='—');
   set('fDeal','deal',t('all_deal'),[...new Set(deals)].sort());
-  set('fStatus','status',t('all_status'),['Not Started','In Progress','Waiting','Blocked','Done','Dropped']);
+  // Status ดึงจากข้อมูลจริงในชีต เรียงตามลำดับงาน (ค่าที่ไม่รู้จักต่อท้าย) — dropdown ชีตเปลี่ยน แอปตามเอง
+  const ORDER=['Not Started','In Progress','Waiting','Blocked','Done','Timeline'];
+  const found=[...new Set(STATE.rows.map(r=>r.status).filter(Boolean))];
+  const statusOpts=[...ORDER.filter(s=>found.includes(s)),...found.filter(s=>!ORDER.includes(s)).sort()];
+  set('fStatus','status',t('all_status'),statusOpts);
   set('fOwner','owner',t('all_owner'),uniq('owner'));
 }
 function buildChips(){
@@ -870,7 +874,8 @@ function renderDashboard(){
   ];
   document.getElementById('focusGrid').innerHTML=focus.map(f=>`<div class="focus-card ${f.c}"><div class="focus-n">${f.n}</div><div class="focus-l">${f.l}</div></div>`).join('');
   // status bars
-  const statuses=[['Not Started','#64778A'],['In Progress','#0891A5'],['Waiting','#D98207'],['Blocked','#7C4DEF'],['Done','#248A57'],['Dropped','#9AA9B8'],['Timeline','#B0BAC6']];
+  // เฉพาะสถานะที่เป็น "งานของทีม" — ไม่รวม Timeline (เหตุการณ์แจ้งให้ทราบ ไม่ใช่งานทีม) และ Dropped (เลิกใช้แล้ว)
+  const statuses=[['Not Started','#64778A'],['In Progress','#0891A5'],['Waiting','#D98207'],['Blocked','#7C4DEF'],['Done','#248A57']];
   const maxS=Math.max(...statuses.map(([s])=>cnt(r=>r.status===s)),1);
   document.getElementById('dashStatus').innerHTML=statuses.map(([s,c])=>{
     const n=cnt(r=>r.status===s); return `<div class="bar-row"><span class="bar-label">${s}</span><span class="bar-track"><span class="bar-fill" style="width:${n/maxS*100}%;background:${c}"></span></span><span class="bar-n">${n}</span></div>`;
@@ -881,7 +886,8 @@ function renderDashboard(){
   const maxP=Math.max(...pcount.map(x=>x[1]),1);
   document.getElementById('dashPeople').innerHTML=pcount.length
     ? pcount.map(([p,n])=>`<div class="bar-row"><span class="bar-label">${esc(p)}</span><span class="bar-track"><span class="bar-fill" style="width:${n/maxP*100}%;background:#0891A5"></span></span><span class="bar-n">${n}</span></div>`).join('')
-    : `<div class="bar-empty">No active tasks</div>`;
+    : `<div class="bar-empty">No active tasks</div>`
+    ;
   // division
   // division — ดึงชื่อจากข้อมูลจริงในชีต (ไม่ฟิกไว้ ถ้า dropdown ในชีตเปลี่ยน แอปเปลี่ยนตาม)
   const divs=[...new Set(active.map(r=>r.division).filter(Boolean))];
