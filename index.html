@@ -110,16 +110,6 @@ tbody tr:hover td{background:#FAFCFD}
 .grp-row td:hover{background:#EAF1F7}
 .grp-caret{display:inline-block;width:14px;color:var(--ink3);transition:transform .15s}
 .grp-row.collapsed .grp-caret{transform:rotate(-90deg)}
-/* คลิกแถวงานเพื่อดู Next Step */
-.task-row{cursor:pointer}
-.task-row.open td{background:#F7FBFD}
-.row-caret{display:inline-block;width:13px;margin-right:2px;color:var(--ink3);font-size:10px;transition:transform .15s}
-.task-row.open .row-caret{transform:rotate(90deg);color:var(--teal)}
-.detail-row td{background:#F7FBFD;border-top:none;padding-top:0}
-.detail-box{display:flex;gap:10px;align-items:baseline;padding:2px 0 8px 30px;font-size:12.5px;line-height:1.5}
-.detail-lbl{color:var(--teal);font-weight:600;font-size:10px;letter-spacing:.05em;text-transform:uppercase;flex-shrink:0}
-.detail-val{color:var(--ink2)}
-.detail-val.none{color:var(--ink3)}
 .grp-count{color:var(--ink3);font-weight:500;font-size:11.5px;margin-left:6px}
 
 .rag{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;white-space:nowrap}
@@ -246,6 +236,13 @@ tbody tr:hover td{background:#FAFCFD}
   .cal-grid{font-size:11px}
   .cal-cell{min-height:60px}
 }
+/* ปุ่ม toggle กระชับ (show/hide completed & timeline) */
+.tgl{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line2);color:var(--ink2);font-size:12px;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tgl:hover{border-color:var(--teal);color:var(--teal-d)}
+.tgl .tgl-box{width:15px;height:15px;border:1.5px solid #C3CFDA;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;line-height:1;color:transparent;transition:all .15s;flex-shrink:0}
+.tgl.on{border-color:var(--teal);color:var(--teal-d);background:var(--teal-bg)}
+.tgl.on .tgl-box{background:var(--teal);border-color:var(--teal);color:#fff}
+.tgl-group{display:inline-flex;gap:8px;align-items:center}
 @media(max-width:560px){
   .tabs{overflow-x:auto}
   .tbl-wrap{overflow-x:auto}
@@ -344,11 +341,6 @@ tbody td{font-size:13.5px}
   .focus-n{font-size:27px}
   /* ปุ่ม/ป้ายใหญ่พอแตะ */
   .btn-primary,.btn-ghost{padding:9px 13px;font-size:13px}
-/* ปุ่ม toggle กระชับ (show/hide completed & timeline) */
-.tgl{display:inline-flex;align-items:center;background:var(--panel);border:1px solid var(--line2);color:var(--ink2);font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap}
-.tgl:hover{border-color:var(--teal);color:var(--teal)}
-.tgl.off{background:var(--teal);color:#fff;border-color:var(--teal)}
-.tgl-group{display:inline-flex;gap:8px;align-items:center}
   .cal-cell{min-height:52px;padding:5px}
   .cal-ev{font-size:11px}
 }
@@ -463,8 +455,8 @@ try{ if(sessionStorage.getItem('qvAuth')==='1'){ document.addEventListener('DOMC
       <button class="btn-primary" id="btnSummary"><span data-i18n="btn_summary">Summary</span></button>
       <div class="viewtog"><button id="viewTable" class="on" data-i18n="view_table">Table</button><button id="viewCards" data-i18n="view_cards">Cards</button></div>
       <div class="tgl-group">
-        <button class="tgl" id="toggleDone"><span id="toggleDoneLbl">Hide completed</span></button>
-        <button class="tgl" id="toggleTimeline"><span id="toggleTimelineLbl">Hide timeline</span></button>
+        <button class="tgl on" id="toggleDone"><span class="tgl-box">✓</span><span id="toggleDoneLbl">Completed</span></button>
+        <button class="tgl on" id="toggleTimeline"><span class="tgl-box">✓</span><span id="toggleTimelineLbl">Timeline</span></button>
       </div>
     </div>
     <div class="chips" id="chips"></div>
@@ -504,8 +496,8 @@ try{ if(sessionStorage.getItem('qvAuth')==='1'){ document.addEventListener('DOMC
       <div class="cust-name">Client Timeline</div>
       <div style="display:flex;align-items:center;gap:10px">
         <div class="tgl-group">
-          <button class="tgl" id="custToggleDone"><span id="custToggleDoneLbl">Hide completed</span></button>
-          <button class="tgl" id="custToggleTimeline"><span id="custToggleTimelineLbl">Hide timeline</span></button>
+          <button class="tgl on" id="custToggleDone"><span class="tgl-box">✓</span><span id="custToggleDoneLbl">Completed</span></button>
+          <button class="tgl on" id="custToggleTimeline"><span class="tgl-box">✓</span><span id="custToggleTimelineLbl">Timeline</span></button>
         </div>
         <div class="sel"><select id="custSelect"></select></div>
       </div>
@@ -580,7 +572,7 @@ const DEMO_DATA = [];  // แอปใช้ข้อมูลจากชีต
    ถ้ามี CSV URL → ดึงจากชีต; ถ้าไม่มี → ใช้ DEMO_DATA */
 let STATE = { rows: [], lang: 'en', page: 'table', view: 'table',
   filters: {division:'',client:'',deal:'',status:'',owner:'',search:''},
-  collapsed: {}, expanded: {}, calMonth: 6, calYear: 2026, custClient: '', sumRange: 'week', hideDone: false, hideTimeline: false, calSelDate: '', custHideDone: false, custHideTimeline: false, cvClient: '' };
+  collapsed: {}, calMonth: 6, calYear: 2026, custClient: '', sumRange: 'week', hideDone: false, hideTimeline: false, calSelDate: '', custHideDone: false, custHideTimeline: false, cvClient: '' };
 
 async function loadData(){
   if(!CONFIG.GOOGLE_SHEET_CSV_URL){
@@ -661,7 +653,7 @@ const I18N={
     col_rag:'RAG',col_task:'Task',col_sub:'Sub-Project',col_pri:'Pri',col_status:'Status',col_owner:'Owner',col_deadline:'Deadline',
     copied:'Copied!',no_tasks:'No tasks in this range',people_note:'has the most — consider rebalancing',
     sum_head:'Task Summary',open_tasks:'open',urgent:'urgent',waiting_ext:'waiting',cust_copy:'Copy client summary',unit_task:'tasks',no_deal:'General',show_done:'Show completed',hide_done:'Hide completed',open_sheet:'Open sheet',
-    cal_hint:'Click a day with tasks to see details',cal_pick:'Select a day with tasks',cal_client:'Client',cal_deal:'Deal',cal_owner:'Owner',cal_status:'Status',cal_next:'Next step',cal_close:'Close',cust_all_done:'No open tasks — tap “Show completed” to see finished work',tl_next:'Next',hide_timeline:'Hide timeline',show_timeline:'Show timeline',row_hint:'Click to see the next step'}
+    cal_hint:'Click a day with tasks to see details',cal_pick:'Select a day with tasks',cal_client:'Client',cal_deal:'Deal',cal_owner:'Owner',cal_status:'Status',cal_next:'Next step',cal_close:'Close',cust_all_done:'No open tasks — tap “Show completed” to see finished work',tl_next:'Next',hide_timeline:'Hide timeline',show_timeline:'Show timeline'}
 };
 const t = k => (I18N[STATE.lang][k]||k);
 
@@ -747,15 +739,15 @@ function applyI18n(){
 }
 // ปุ่ม toggle 4 ตัว (Tasks + Clients) — label + สถานะ .off สะท้อน state
 function syncToggleBtns(){
-  const set=(btnId,lblId,hidden,showTxt,hideTxt)=>{
-    const b=document.getElementById(btnId), l=document.getElementById(lblId);
-    if(l) l.textContent=hidden?showTxt:hideTxt;
-    if(b) b.classList.toggle('off',hidden);
+  // checkbox chip: ติ๊ก (.on) = แสดงอยู่ · ไม่ติ๊ก = ซ่อนอยู่ — ข้อความคงที่ ไม่สลับ
+  const set=(btnId,hidden)=>{
+    const b=document.getElementById(btnId);
+    if(b){ b.classList.toggle('on',!hidden); b.setAttribute('aria-pressed',String(!hidden)); }
   };
-  set('toggleDone','toggleDoneLbl',STATE.hideDone,'Show completed','Hide completed');
-  set('toggleTimeline','toggleTimelineLbl',STATE.hideTimeline,'Show timeline','Hide timeline');
-  set('custToggleDone','custToggleDoneLbl',STATE.custHideDone,'Show completed','Hide completed');
-  set('custToggleTimeline','custToggleTimelineLbl',STATE.custHideTimeline,'Show timeline','Hide timeline');
+  set('toggleDone',STATE.hideDone);
+  set('toggleTimeline',STATE.hideTimeline);
+  set('custToggleDone',STATE.custHideDone);
+  set('custToggleTimeline',STATE.custHideTimeline);
 }
 
 // ---------- helpers ----------
@@ -797,7 +789,7 @@ function buildFilters(){
   // cascading: Deal shows only for selected client
   let deals = STATE.rows.filter(r=>!f.client||r.client===f.client).map(r=>r.deal).filter(v=>v&&v!=='—');
   set('fDeal','deal',t('all_deal'),[...new Set(deals)].sort());
-  // Status ดึงจากข้อมูลจริงในชีต เรียงตามลำดับงาน (ค่าที่ไม่รู้จักต่อท้าย) — dropdown ชีตเปลี่ยน แอปตามเอง
+  // Status ดึงจากข้อมูลจริงในชีต เรียงตามลำดับงาน — dropdown ชีตเปลี่ยน แอปตามเอง
   const ORDER=['Not Started','In Progress','Waiting','Blocked','Done','Timeline'];
   const found=[...new Set(STATE.rows.map(r=>r.status).filter(Boolean))];
   const statusOpts=[...ORDER.filter(s=>found.includes(s)),...found.filter(s=>!ORDER.includes(s)).sort()];
@@ -844,27 +836,22 @@ function renderTable(){
   Object.keys(groups).forEach(gk=>{
     const collapsed=STATE.collapsed[gk];
     html+=`<tr class="grp-row${collapsed?' collapsed':''}" data-grp="${gk.replace(/"/g,'')}"><td colspan="7"><span class="grp-caret">▾</span>${gk}<span class="grp-count">${groups[gk].length} ${t('unit_task')}</span></td></tr>`;
-    if(!collapsed) groups[gk].forEach((r,ri)=>{
+    if(!collapsed) groups[gk].forEach(r=>{
       const warn=hasWarnBlankTime(r);
-      const rk=gk+'#'+ri;
-      const open=STATE.expanded[rk];
-      const ns=(r.nextStep||'').trim();
-      html+=`<tr class="task-row${open?' open':''}" data-row="${esc(rk)}" title="${t('row_hint')}">
+      html+=`<tr>
         <td><span class="rag ${ragClass(r)}"><span class="rag-dot"></span>${r.rag||'—'}</span></td>
-        <td class="task-cell"><span class="row-caret">▸</span>${esc(r.task)}</td>
+        <td class="task-cell">${esc(r.task)}</td>
         <td style="color:var(--ink2)">${esc(r.subProject)||'—'}</td>
         <td><span class="pri pri-${r.priority}">${r.priority}</span></td>
         <td><span class="pill ${statusClass(r.status)}">${r.status}</span></td>
         <td>${esc(r.owner)}</td>
         <td class="${warn?'warn-cell':''}">${r.deadline?`<span class="dl ${isOverdue(r.deadline,r.status)?'dl-soon':''}">${fmtDate(r.deadline)}</span>`:(r.timeframe?`<span class="tf-tag">${r.timeframe}</span>`:'<span style="color:var(--amber);font-weight:600">⚠ No date</span>')}</td>
       </tr>`;
-      if(open) html+=`<tr class="detail-row"><td colspan="7"><div class="detail-box"><span class="detail-lbl">${t('tl_next')}</span><span class="detail-val${ns?'':' none'}">${ns?esc(ns):'-'}</span></div></td></tr>`;
     });
   });
   html+='</tbody></table>';
   wrap.innerHTML=html;
   wrap.querySelectorAll('.grp-row').forEach(gr=>gr.onclick=()=>{ const k=gr.dataset.grp; STATE.collapsed[k]=!STATE.collapsed[k]; renderTable(); });
-  wrap.querySelectorAll('.task-row').forEach(tr=>tr.onclick=()=>{ const k=tr.dataset.row; STATE.expanded[k]=!STATE.expanded[k]; renderTable(); });
 }
 
 // ---------- render: CARDS ----------
@@ -897,7 +884,7 @@ function renderDashboard(){
   ];
   document.getElementById('focusGrid').innerHTML=focus.map(f=>`<div class="focus-card ${f.c}"><div class="focus-n">${f.n}</div><div class="focus-l">${f.l}</div></div>`).join('');
   // status bars
-  // เฉพาะสถานะที่เป็น "งานของทีม" — ไม่รวม Timeline (เหตุการณ์แจ้งให้ทราบ ไม่ใช่งานทีม) และ Dropped (เลิกใช้แล้ว)
+  // เฉพาะสถานะที่เป็น "งานของทีม" — ไม่รวม Timeline (เหตุการณ์แจ้งให้ทราบ) และ Dropped (เลิกใช้แล้ว)
   const statuses=[['Not Started','#64778A'],['In Progress','#0891A5'],['Waiting','#D98207'],['Blocked','#7C4DEF'],['Done','#248A57']];
   const maxS=Math.max(...statuses.map(([s])=>cnt(r=>r.status===s)),1);
   document.getElementById('dashStatus').innerHTML=statuses.map(([s,c])=>{
@@ -911,7 +898,6 @@ function renderDashboard(){
     ? pcount.map(([p,n])=>`<div class="bar-row"><span class="bar-label">${esc(p)}</span><span class="bar-track"><span class="bar-fill" style="width:${n/maxP*100}%;background:#0891A5"></span></span><span class="bar-n">${n}</span></div>`).join('')
     : `<div class="bar-empty">No active tasks</div>`
     ;
-  // division
   // division — ดึงชื่อจากข้อมูลจริงในชีต (ไม่ฟิกไว้ ถ้า dropdown ในชีตเปลี่ยน แอปเปลี่ยนตาม)
   const divs=[...new Set(active.map(r=>r.division).filter(Boolean))];
   const dcount=divs.map(d=>[d,active.filter(r=>r.division===d).length]).sort((a,b)=>b[1]-a[1]);
