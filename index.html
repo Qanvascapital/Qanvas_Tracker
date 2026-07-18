@@ -110,6 +110,16 @@ tbody tr:hover td{background:#FAFCFD}
 .grp-row td:hover{background:#EAF1F7}
 .grp-caret{display:inline-block;width:14px;color:var(--ink3);transition:transform .15s}
 .grp-row.collapsed .grp-caret{transform:rotate(-90deg)}
+/* คลิกแถวงานเพื่อดู Next Step */
+.task-row{cursor:pointer}
+.task-row.open td{background:#F7FBFD}
+.row-caret{display:inline-block;width:13px;margin-right:2px;color:var(--ink3);font-size:10px;transition:transform .15s}
+.task-row.open .row-caret{transform:rotate(90deg);color:var(--teal)}
+.detail-row td{background:#F7FBFD;border-top:none;padding-top:0}
+.detail-box{display:flex;gap:10px;align-items:baseline;padding:2px 0 8px 30px;font-size:12.5px;line-height:1.5}
+.detail-lbl{color:var(--teal);font-weight:600;font-size:10px;letter-spacing:.05em;text-transform:uppercase;flex-shrink:0}
+.detail-val{color:var(--ink2)}
+.detail-val.none{color:var(--ink3)}
 .grp-count{color:var(--ink3);font-weight:500;font-size:11.5px;margin-left:6px}
 
 .rag{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;white-space:nowrap}
@@ -570,7 +580,7 @@ const DEMO_DATA = [];  // แอปใช้ข้อมูลจากชีต
    ถ้ามี CSV URL → ดึงจากชีต; ถ้าไม่มี → ใช้ DEMO_DATA */
 let STATE = { rows: [], lang: 'en', page: 'table', view: 'table',
   filters: {division:'',client:'',deal:'',status:'',owner:'',search:''},
-  collapsed: {}, calMonth: 6, calYear: 2026, custClient: '', sumRange: 'week', hideDone: false, hideTimeline: false, calSelDate: '', custHideDone: false, custHideTimeline: false, cvClient: '' };
+  collapsed: {}, expanded: {}, calMonth: 6, calYear: 2026, custClient: '', sumRange: 'week', hideDone: false, hideTimeline: false, calSelDate: '', custHideDone: false, custHideTimeline: false, cvClient: '' };
 
 async function loadData(){
   if(!CONFIG.GOOGLE_SHEET_CSV_URL){
@@ -651,7 +661,7 @@ const I18N={
     col_rag:'RAG',col_task:'Task',col_sub:'Sub-Project',col_pri:'Pri',col_status:'Status',col_owner:'Owner',col_deadline:'Deadline',
     copied:'Copied!',no_tasks:'No tasks in this range',people_note:'has the most — consider rebalancing',
     sum_head:'Task Summary',open_tasks:'open',urgent:'urgent',waiting_ext:'waiting',cust_copy:'Copy client summary',unit_task:'tasks',no_deal:'General',show_done:'Show completed',hide_done:'Hide completed',open_sheet:'Open sheet',
-    cal_hint:'Click a day with tasks to see details',cal_pick:'Select a day with tasks',cal_client:'Client',cal_deal:'Deal',cal_owner:'Owner',cal_status:'Status',cal_next:'Next step',cal_close:'Close',cust_all_done:'No open tasks — tap “Show completed” to see finished work',tl_next:'Next',hide_timeline:'Hide timeline',show_timeline:'Show timeline'}
+    cal_hint:'Click a day with tasks to see details',cal_pick:'Select a day with tasks',cal_client:'Client',cal_deal:'Deal',cal_owner:'Owner',cal_status:'Status',cal_next:'Next step',cal_close:'Close',cust_all_done:'No open tasks — tap “Show completed” to see finished work',tl_next:'Next',hide_timeline:'Hide timeline',show_timeline:'Show timeline',row_hint:'Click to see the next step'}
 };
 const t = k => (I18N[STATE.lang][k]||k);
 
@@ -834,22 +844,27 @@ function renderTable(){
   Object.keys(groups).forEach(gk=>{
     const collapsed=STATE.collapsed[gk];
     html+=`<tr class="grp-row${collapsed?' collapsed':''}" data-grp="${gk.replace(/"/g,'')}"><td colspan="7"><span class="grp-caret">▾</span>${gk}<span class="grp-count">${groups[gk].length} ${t('unit_task')}</span></td></tr>`;
-    if(!collapsed) groups[gk].forEach(r=>{
+    if(!collapsed) groups[gk].forEach((r,ri)=>{
       const warn=hasWarnBlankTime(r);
-      html+=`<tr>
+      const rk=gk+'#'+ri;
+      const open=STATE.expanded[rk];
+      const ns=(r.nextStep||'').trim();
+      html+=`<tr class="task-row${open?' open':''}" data-row="${esc(rk)}" title="${t('row_hint')}">
         <td><span class="rag ${ragClass(r)}"><span class="rag-dot"></span>${r.rag||'—'}</span></td>
-        <td class="task-cell">${esc(r.task)}</td>
+        <td class="task-cell"><span class="row-caret">▸</span>${esc(r.task)}</td>
         <td style="color:var(--ink2)">${esc(r.subProject)||'—'}</td>
         <td><span class="pri pri-${r.priority}">${r.priority}</span></td>
         <td><span class="pill ${statusClass(r.status)}">${r.status}</span></td>
         <td>${esc(r.owner)}</td>
         <td class="${warn?'warn-cell':''}">${r.deadline?`<span class="dl ${isOverdue(r.deadline,r.status)?'dl-soon':''}">${fmtDate(r.deadline)}</span>`:(r.timeframe?`<span class="tf-tag">${r.timeframe}</span>`:'<span style="color:var(--amber);font-weight:600">⚠ No date</span>')}</td>
       </tr>`;
+      if(open) html+=`<tr class="detail-row"><td colspan="7"><div class="detail-box"><span class="detail-lbl">${t('tl_next')}</span><span class="detail-val${ns?'':' none'}">${ns?esc(ns):'-'}</span></div></td></tr>`;
     });
   });
   html+='</tbody></table>';
   wrap.innerHTML=html;
   wrap.querySelectorAll('.grp-row').forEach(gr=>gr.onclick=()=>{ const k=gr.dataset.grp; STATE.collapsed[k]=!STATE.collapsed[k]; renderTable(); });
+  wrap.querySelectorAll('.task-row').forEach(tr=>tr.onclick=()=>{ const k=tr.dataset.row; STATE.expanded[k]=!STATE.expanded[k]; renderTable(); });
 }
 
 // ---------- render: CARDS ----------
