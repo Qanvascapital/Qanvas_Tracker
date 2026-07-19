@@ -895,7 +895,7 @@ function renderDashboard(){
     {c:'red',n:cnt(r=>r.rag==='Red'&&STATUS_ACTIVE(r)),l:t('focus_risk')},
     {c:'amber',n:cnt(r=>r.status==='Waiting'),l:t('focus_wait')},
     {c:'purple',n:cnt(r=>r.status==='Blocked'),l:t('focus_block')},
-    {c:'teal',n:cnt(r=>r.verify==='Yes'&&STATUS_ACTIVE(r)),l:t('focus_verify')}
+    {c:'teal',n:cnt(r=>isYes(r.verify)&&STATUS_ACTIVE(r)),l:t('focus_verify')}
   ];
   document.getElementById('focusGrid').innerHTML=focus.map(f=>`<div class="focus-card ${f.c}"><div class="focus-n">${f.n}</div><div class="focus-l">${f.l}</div></div>`).join('');
   // status bars
@@ -924,7 +924,8 @@ function renderDashboard(){
 
 // ---------- render: CALENDAR ----------
 function calEvents(iso){
-  return STATE.rows.filter(r=>r.deadline===iso && (!STATE.hideDone || (r.status!=='Done'&&r.status!=='Dropped')));
+  // ปฏิทินแสดงทุกงานที่มีวันที่ — ไม่ผูกกับปุ่มของหน้า Tasks (ปฏิทินต้องเห็นครบเสมอ)
+  return STATE.rows.filter(r=>r.deadline===iso);
 }
 function renderCalendar(){
   const y=STATE.calYear,m=STATE.calMonth;
