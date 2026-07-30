@@ -423,6 +423,57 @@ tbody td{font-size:13.5px}
   .cal-ev{font-size:11px}
 }
 
+
+/* ═══ v3: แผงแก้ไข · ฟอร์ม · กล่องเตือน · toast ═══ */
+.only-editor{display:none}
+body.can-edit .only-editor{display:inline-flex}
+.detail-wrap{padding:4px 0 12px 30px}
+.detail-wrap.saving{opacity:.55;pointer-events:none}
+.d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px 14px;margin-bottom:10px}
+.d-f{display:flex;flex-direction:column;gap:4px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3)}
+.d-f.d-wide{grid-column:1/-1}
+.d-in{font-family:inherit;font-size:13.5px;color:var(--ink);background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:7px 10px;width:100%}
+.d-in:focus{outline:2px solid var(--teal-bg);border-color:var(--teal)}
+.d-chk{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);align-self:end;padding-bottom:7px}
+.d-chk input{width:15px;height:15px;accent-color:var(--teal)}
+.d-acts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.d-btn{font-size:12px;font-weight:600;color:var(--ink2);background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:6px 11px;cursor:pointer;white-space:nowrap;transition:all var(--dur) var(--ease)}
+.d-btn:hover{border-color:var(--teal);color:var(--teal-d)}
+.d-btn.d-primary{background:var(--teal);border-color:var(--teal);color:#fff}
+.d-btn.d-primary:hover{background:var(--teal-d);color:#fff}
+.d-foot{display:flex;gap:8px;flex-wrap:wrap}
+/* ฟอร์ม */
+.fm-body{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.fm-l{display:flex;flex-direction:column;gap:5px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3)}
+.fm-l.fm-wide,.fm-err,.fm-quick,.fm-task{grid-column:1/-1}
+.fm-l input,.fm-l select,.fm-l textarea{font-family:inherit;font-size:13.5px;color:var(--ink);background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:8px 10px;width:100%;text-transform:none;letter-spacing:normal;font-weight:400}
+.fm-l input:focus,.fm-l select:focus,.fm-l textarea:focus{outline:2px solid var(--teal-bg);border-color:var(--teal)}
+.fm-hint{font-weight:400;text-transform:none;letter-spacing:normal;color:var(--ink3);font-size:11px}
+.fm-err{color:var(--red-fg);font-size:12.5px;min-height:16px}
+.fm-quick{display:flex;gap:7px}
+.fm-task{font-size:14px;font-weight:500;color:var(--ink);background:var(--bg);border-radius:9px;padding:10px 12px}
+/* กล่องเตือนงานเลยกำหนด */
+.od-box{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--red);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+.od-head{font-size:12.5px;font-weight:700;color:var(--red-fg);margin-bottom:8px}
+.od-row{display:flex;align-items:center;gap:12px;padding:7px 0;border-top:1px solid var(--line)}
+.od-row:first-of-type{border-top:none}
+.od-d{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--red-fg);font-weight:600;flex-shrink:0;min-width:44px}
+.od-t{flex:1;min-width:0;font-size:13px;color:var(--ink);overflow-wrap:break-word}
+.od-m{display:block;font-size:11.5px;color:var(--ink3)}
+.od-b{display:flex;gap:6px;flex-shrink:0}
+.od-more{font-size:12px;color:var(--ink3);padding-top:7px}
+/* toast + ปุ่ม Undo */
+.qv-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy2);color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;z-index:99;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:14px;max-width:90vw}
+[data-theme] .qv-toast,.qv-toast{background:#0A2540}
+@media (prefers-color-scheme: dark){.qv-toast{background:#113252;border:1px solid var(--line2)}}
+.qv-toast-a{background:none;border:none;color:var(--sky-accent);font-weight:700;font-size:13px;cursor:pointer;padding:0}
+@media(max-width:560px){
+  .fm-body{grid-template-columns:1fr}
+  .detail-wrap{padding-left:8px}
+  .od-row{flex-wrap:wrap}
+  .od-b{width:100%}
+}
+
 /* ===== Client View (รายงานลูกค้า) =====
    ⚠️ ตั้งใจให้เป็นโหมดสว่างเสมอ ไม่ว่าเครื่องจะตั้งเป็นมืดหรือไม่
    เพราะเอกสารนี้ถูกส่งออกเป็น PNG/PDF ให้ลูกค้า — ต้องเป็นกระดาษขาวทุกครั้ง */
@@ -480,38 +531,7 @@ tbody td{font-size:13.5px}
 .cv-empty{text-align:center;padding:60px 20px;color:var(--ink3)}
 </style>
 </head><body>
-<!-- ═══ Login Gate ═══ -->
-<div id="loginGate" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#071A2E,#0A2540 60%,#0A4A57);display:flex;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:18px;padding:40px 36px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center">
-    <img src="data:image/png;base64,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" alt="Qanvas" style="width:58px;height:58px;object-fit:contain;margin:0 auto 18px;display:block">
-    <div style="font-family:'Sora',sans-serif;font-size:19px;font-weight:600;color:#0A2540;letter-spacing:-.01em">QANVAS CAPITAL</div>
-    <div style="font-size:12px;color:#7C93A6;margin-top:4px;margin-bottom:22px">Enter access code to continue</div>
-    <input id="loginInput" type="password" placeholder="Access code" style="width:100%;padding:12px 14px;border:1.5px solid #DCE4EC;border-radius:10px;font-size:14px;outline:none;text-align:center;letter-spacing:.1em" onkeydown="if(event.key==='Enter')checkLogin()">
-    <div id="loginErr" style="color:#D64545;font-size:12px;margin-top:8px;height:16px"></div>
-    <button onclick="checkLogin()" style="width:100%;margin-top:12px;padding:12px;background:linear-gradient(120deg,#00A8B5,#3DD5E8);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">Enter</button>
-  </div>
-</div>
-<script>
-/* Access code — จำไว้ในเครื่องนี้ 30 วัน จะได้ไม่ต้องพิมพ์ทุกครั้ง
-   หมายเหตุ: รหัสอยู่ในหน้าเว็บ = กันคนเปิดเจอโดยบังเอิญ ไม่ใช่ security จริง
-   จะถูกแทนที่ด้วยการล็อกอิน Google ในเฟสถัดไป */
-var QV_CODE='168', QV_DAYS=30;
-function qvRemember(){
-  var until=Date.now()+QV_DAYS*864e5;
-  try{ localStorage.setItem('qvAuthUntil',String(until)); }catch(e){}
-  try{ sessionStorage.setItem('qvAuth','1'); }catch(e){}
-}
-function qvValid(){
-  try{ if(sessionStorage.getItem('qvAuth')==='1') return true; }catch(e){}
-  try{ var u=parseInt(localStorage.getItem('qvAuthUntil')||'0',10); return u>Date.now(); }catch(e){ return false; }
-}
-function checkLogin(){
-  var v=document.getElementById('loginInput').value.trim();
-  if(v===QV_CODE){ document.getElementById('loginGate').style.display='none'; qvRemember(); }
-  else{ document.getElementById('loginErr').textContent='Incorrect code'; document.getElementById('loginInput').value=''; }
-}
-if(qvValid()){ document.addEventListener('DOMContentLoaded',function(){var g=document.getElementById('loginGate');if(g)g.style.display='none';}); }
-</script>
+<!-- หน้าใส่รหัสถูกถอดออกใน v3 — ใช้การล็อกอิน Google ผ่าน Apps Script แทน -->
 <div class="app">
   <!-- ═══ [บล็อก 3] โครงหน้า (HTML) ═══ -->
   <div class="topbar">
@@ -537,6 +557,7 @@ if(qvValid()){ document.addEventListener('DOMContentLoaded',function(){var g=doc
 
   <!-- ===== หน้า: ตาราง ===== -->
   <div id="page-table" class="page">
+    <div id="overdueBox" class="od-box hidden"></div>
     <div class="toolbar">
       <div class="sel"><select id="fDivision"></select></div>
       <div class="sel"><select id="fClient"></select></div>
@@ -547,7 +568,8 @@ if(qvValid()){ document.addEventListener('DOMContentLoaded',function(){var g=doc
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93A6B6" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
         <input id="fSearch" type="text" data-i18n-ph="ph_search" placeholder="Search tasks...">
       </div>
-      <button class="btn-primary" id="btnSummary"><span data-i18n="btn_summary">Summary</span></button>
+      <button class="btn-primary only-editor" id="btnAdd">+ Add task</button>
+      <button class="btn-ghost" id="btnSummary"><span data-i18n="btn_summary">Summary</span></button>
       <div class="viewtog"><button id="viewTable" class="on" data-i18n="view_table">Table</button><button id="viewCards" data-i18n="view_cards">Cards</button></div>
       <div class="tgl-group">
         <button class="tgl on" id="toggleDone"><span class="tgl-box">✓</span><span id="toggleDoneLbl">Completed</span></button>
@@ -637,6 +659,7 @@ if(qvValid()){ document.addEventListener('DOMContentLoaded',function(){var g=doc
 
 
 <!-- ===== modal คู่มือการดูแอป ===== -->
+<div id="formModal" class="modal-bg hidden"></div>
 <div id="helpModal" class="modal-bg hidden">
   <div class="modal">
     <div class="modal-head">
@@ -653,10 +676,11 @@ if(qvValid()){ document.addEventListener('DOMContentLoaded',function(){var g=doc
    เชื่อม Google Sheet จริง: ใส่ URL CSV ที่ publish แล้ว
    ตอนนี้ว่าง = ใช้ข้อมูลเดโมฝังในแอป (บล็อก 4)
    ═══════════════════════════════════════════════════════════ */
-const APP_VERSION = "v2.0 · 30 Jul 2026";
+const APP_VERSION = "v3.0 · 30 Jul 2026";
 const CONFIG = {
-  GOOGLE_SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRt_yrBWhh8Y0vzC7WxBtuLIi9z3hmYunPZGSiCQufjt-DPAgvzH4N2RaDygRNiaoopRcFDrdUBiIRc/pub?gid=111634058&single=true&output=csv",   // ← ใส่ลิงก์ CSV จาก Google Sheet ตรงนี้
-  POLL_SECONDS: 15,
+  // ลิงก์แอปตัวจริง (ผ่าน Apps Script) — ใช้ตอนมีคนเผลอเปิดไฟล์หน้าตาตรง ๆ
+  APP_URL: "https://script.google.com/macros/s/AKfycbyrvf2IkFCp0B2REONjztRpg9woUIlUognN27p2K-cZCZs4DxFATEm4TNzsJNCwshC_/exec",
+  POLL_SECONDS: 45,   // ข้อมูลสดอยู่แล้ว ไม่ต้องถี่เท่าเดิม
   GUIDE_URL: "https://docs.google.com/spreadsheets/d/17UF94COeRiEmFR6_D-LdsZBP_DhzHHrPMZmMC93cij8/edit?gid=111634058",             // ← ใส่ลิงก์ Google Sheet ตรงนี้ (คนกด "เปิดชีต" เพื่อไปแก้ข้อมูล)
   TODAY: new Date().toISOString().slice(0,10)        // วันนี้ (เดโม) — ต่อชีตจริงใช้ new Date()
 };
@@ -668,26 +692,52 @@ const DEMO_DATA = [];  // แอปใช้ข้อมูลจากชีต
    ถ้ามี CSV URL → ดึงจากชีต; ถ้าไม่มี → ใช้ DEMO_DATA */
 let STATE = { rows: [], lang: 'en', page: 'table', view: 'table',
   filters: {division:'',client:'',deal:'',status:'',owner:'',search:'',rag:'',verify:'',activeOnly:false},
-  collapsed: {}, expanded: {}, calMonth: 6, calYear: 2026, custClient: '', sumRange: 'week', hideDone: false, hideTimeline: false, calSelDate: '', custHideDone: false, custHideTimeline: false, cvClient: '' };
+  me:{role:'viewer'}, undo:null, dirtyLock:false, saving:{}, collapsed: {}, expanded: {}, calMonth: 6, calYear: 2026, custClient: '', sumRange: 'week', hideDone: false, hideTimeline: false, calSelDate: '', custHideDone: false, custHideTimeline: false, cvClient: '' };
 
-async function loadData(){
-  if(!CONFIG.GOOGLE_SHEET_CSV_URL){
-    STATE.rows = [];
-    document.getElementById('syncText').textContent = '⚠️ Sheet URL not set';
-    render(); return;
-  }
-  const sc=document.getElementById('syncText');
-  try{
-    const res = await fetch(CONFIG.GOOGLE_SHEET_CSV_URL);
-    if(!res.ok){ sc.textContent='⚠️ Sheet error (HTTP '+res.status+')'; STATE.rows=[]; render(); return; }
-    const txt = await res.text();
-    const parsed = parseCSV(txt);
-    STATE.rows = parsed;  // ชีตมีอะไร แอปแสดงตามนั้น (ว่างก็ว่างตาม)
-    const t = new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-    sc.textContent = 'Synced '+t+' · '+parsed.length+' tasks';
-    render();
-  }catch(e){ sc.textContent='⚠️ Sheet error: '+(e.message||'network/CORS'); STATE.rows = []; render(); }
+/* ═══ ชั้นเชื่อมต่อ — คุยกับ Apps Script (แทน CSV เดิม) ═══
+   เหตุผลที่เลิกใช้ CSV: ค้าง 5 นาที · เซลล์ที่มีการขึ้นบรรทัดใหม่ทำให้แถวแตก ·
+   ไม่รู้เลขแถวจริงจึงเขียนกลับไม่ได้ */
+const HAS_API = (typeof google!=='undefined' && google.script && google.script.run);
+function api(fn, arg){
+  return new Promise((resolve,reject)=>{
+    if(!HAS_API){ reject(new Error('NO_API')); return; }
+    google.script.run.withSuccessHandler(resolve).withFailureHandler(e=>reject(new Error(e && e.message ? e.message : String(e))))[fn](arg);
+  });
 }
+function setSync(txt,cls){
+  const el=document.getElementById('syncText'); if(el) el.textContent=txt;
+  const dot=document.querySelector('.sync-dot'); if(dot) dot.style.background = cls==='bad' ? 'var(--red)' : (cls==='busy' ? 'var(--amber)' : 'var(--teal)');
+}
+async function loadData(silent){
+  if(!HAS_API){ showOpenViaAppNotice(); return; }
+  if(!silent) setSync('Loading…','busy');
+  try{
+    const res = await api('getRows');
+    STATE.me = res.me || {role:'viewer'};
+    STATE.rows = (res.rows||[]).map(mapRow);
+    document.body.classList.toggle('can-edit', STATE.me.role==='editor');
+    const t=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    setSync('Synced '+t+' · '+STATE.rows.length+' tasks'+(STATE.me.role==='editor'?'':' · view only'));
+    render();
+  }catch(e){
+    setSync('⚠️ '+(e.message||'Cannot reach the sheet'),'bad');
+    if(!STATE.rows.length) render();
+  }
+}
+// แปลงหัวคอลัมน์ชีต → key ที่แอปใช้ · เก็บ _row (เลขแถวจริง) ไว้เขียนกลับ
+function mapRow(o){
+  const r={_row:o._row};
+  for(const h in COLUMN_MAP) r[COLUMN_MAP[h]] = (o[h]!=null? String(o[h]).trim() : '');
+  r.deadline=normDate(r.deadline); r.dateCompleted=normDate(r.dateCompleted);
+  return r;
+}
+function showOpenViaAppNotice(){
+  document.body.innerHTML='<div style="font-family:Inter,system-ui;max-width:520px;margin:14vh auto;text-align:center;padding:0 24px;color:var(--ink)">'+
+    '<div style="font-size:19px;font-weight:600;margin-bottom:10px">Open the app from its own link</div>'+
+    '<div style="font-size:14px;color:var(--ink2);line-height:1.7">This page is only the interface. Task data is served through the secure app link, which also signs you in with your Google account.</div>'+
+    '<a href="'+CONFIG.APP_URL+'" target="_top" style="display:inline-block;margin-top:18px;background:var(--teal);color:#fff;padding:11px 20px;border-radius:9px;font-weight:600;font-size:14px;text-decoration:none">Open Qanvas Tracker →</a></div>';
+}
+
 // map หัวคอลัมน์ชีต → key ในแอป (ปรับได้ถ้าหัวชีตต่าง)
 const COLUMN_MAP = {'Division':'division','Client':'client','Deal':'deal','Sub-Project':'subProject','Task':'task','Priority':'priority','Status':'status','Next Step':'nextStep','Owner':'owner','Counterparty':'counterparty','Deadline':'deadline','Timeframe':'timeframe','RAG':'rag','Date Completed':'dateCompleted','Verify?':'verify','Remarks':'remarks','Client-view':'clientView','Client-message':'clientMessage'};
 function parseCSV(txt){
@@ -746,6 +796,216 @@ try{
   const onScheme=()=>{ try{ render(); }catch(e){} };
   mq.addEventListener ? mq.addEventListener('change',onScheme) : mq.addListener(onScheme);
 }catch(e){}
+
+
+/* ═══════════════════════════════════════════════════════════
+   [บล็อก 7] ชั้นเขียนกลับ — ทุกการแก้ไขวิ่งผ่านที่นี่ที่เดียว
+   หลักการ: แสดงผลทันที → ส่งไปตรวจ → สำเร็จก็ยืนยัน ล้มเหลวก็ย้อนค่า
+   ไม่มีทางที่หน้าจอจะบอกว่าบันทึกแล้วทั้งที่ชีตไม่ได้เปลี่ยน
+   ═══════════════════════════════════════════════════════════ */
+const EDITABLE_UI=['status','nextStep','deadline','clientView','remarks','rag','dateCompleted','owner','counterparty','priority','timeframe'];
+const KEY2HEADER={status:'Status',nextStep:'Next Step',deadline:'Deadline',clientView:'Client-view',remarks:'Remarks',
+  rag:'RAG',dateCompleted:'Date Completed',owner:'Owner',counterparty:'Counterparty',priority:'Priority',timeframe:'Timeframe',clientMessage:'Client-message'};
+const STATUS_VALUES=['Not Started','In Progress','Waiting','Blocked','Done','Timeline'];
+
+function canEdit(){ return STATE.me && STATE.me.role==='editor'; }
+function rowByNum(n){ return STATE.rows.find(r=>r._row===n); }
+
+/** บันทึกการแก้ไขของแถวเดียว — patch ใช้ key ของแอป เช่น {status:'Done'} */
+async function saveRow(rowNum, patch, opts){
+  opts=opts||{};
+  if(!canEdit()){ toast('View-only access'); return false; }
+  const r=rowByNum(rowNum); if(!r) return false;
+  const fields={}, before={};
+  for(const k in patch){
+    if(EDITABLE_UI.indexOf(k)<0){ console.warn('field not editable:',k); continue; }
+    fields[KEY2HEADER[k]]=patch[k]; before[k]=r[k];
+  }
+  if(!Object.keys(fields).length) return false;
+
+  STATE.dirtyLock=true; STATE.saving[rowNum]=true;
+  Object.assign(r,patch);            // แสดงผลทันที (optimistic)
+  render(); setSync('Saving…','busy');
+  try{
+    const res=await api('updateRow',{row:rowNum, expectedTask:r.task, fields:fields});
+    if(res && res.conflict){
+      Object.assign(r,before); render();
+      toast('Someone changed this row — refreshing');
+      await loadData(true); return false;
+    }
+    if(!opts.noUndo) armUndo(rowNum,before,opts.label||'Change saved');
+    else toast(opts.label||'Saved');
+    setSync('Saved');
+    return true;
+  }catch(e){
+    Object.assign(r,before); render();               // ย้อนค่า ไม่หลอกตา
+    toast('Not saved: '+(e.message||'error'));
+    setSync('⚠️ Not saved','bad');
+    return false;
+  }finally{ STATE.dirtyLock=false; delete STATE.saving[rowNum]; }
+}
+
+/** ปุ่มย้อนกลับ 30 วินาที */
+function armUndo(rowNum,before,label){
+  STATE.undo={row:rowNum,before:before,at:Date.now()};
+  toast(label,{action:'Undo', onAction:async()=>{
+    const u=STATE.undo; if(!u) return;
+    STATE.undo=null;
+    await saveRow(u.row,u.before,{noUndo:true,label:'Reverted'});
+  }});
+  setTimeout(()=>{ if(STATE.undo && Date.now()-STATE.undo.at>=29500) STATE.undo=null; },30000);
+}
+
+/* ---------- ปุ่มลัด ---------- */
+const todayISO=()=>new Date().toISOString().slice(0,10);
+function actDone(rowNum){
+  // ปิดงาน = 3 ช่องในคลิกเดียว (เดิมต้องแก้ทีละช่อง คนลืมประจำ → เกิดเคส Done แต่ RAG ยังแดง)
+  return saveRow(rowNum,{status:'Done',dateCompleted:todayISO(),rag:''},{label:'Task closed'});
+}
+async function actDoneNext(rowNum){
+  const r=rowByNum(rowNum); if(!r) return;
+  const nextTitle=(r.nextStep||'').trim();
+  if(!nextTitle){ toast('No next step written on this task'); return; }
+  openAddModal({client:r.client,deal:r.deal,division:r.division,subProject:r.subProject,
+    owner:r.owner,task:nextTitle,priority:r.priority||'P2',
+    _after:async()=>{ await actDone(rowNum); }, _title:'Close this task and open the next one'});
+}
+function actPostpone(rowNum){
+  const r=rowByNum(rowNum); if(!r) return;
+  openPostponeModal(r);
+}
+function actWaiting(rowNum){
+  const r=rowByNum(rowNum); if(!r) return;
+  const who=prompt('Waiting on whom? (client, bank, advisor…)', r.counterparty||'');
+  if(who===null) return;
+  if(!who.trim()){ toast('Name the external party'); return; }
+  return saveRow(rowNum,{status:'Waiting',counterparty:who.trim()},{label:'Marked as waiting'});
+}
+function actLog(rowNum){
+  const r=rowByNum(rowNum); if(!r) return;
+  const note=prompt('Progress note (one line)');
+  if(note===null||!note.trim()) return;
+  const d=new Date(), stamp=('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2);
+  const who=(STATE.me.email||'').split('@')[0];
+  const line='['+stamp+' '+who+'] '+note.trim();
+  const merged=(r.remarks? r.remarks+' · ':'')+line;
+  return saveRow(rowNum,{remarks:merged},{label:'Note added'});
+}
+function actDuplicate(rowNum){
+  const r=rowByNum(rowNum); if(!r) return;
+  openAddModal({client:r.client,deal:r.deal,division:r.division,subProject:r.subProject,
+    owner:r.owner,task:r.task,priority:r.priority||'P2',timeframe:r.timeframe,
+    _title:'Duplicate this task'});
+}
+function openRowInSheet(rowNum){
+  if(!CONFIG.GUIDE_URL) return;
+  window.open(CONFIG.GUIDE_URL+'&range=A'+rowNum,'_blank');
+}
+/** เพิ่มลงปฏิทินของเครื่อง — ไฟล์ .ics ไม่ต้องพึ่งระบบแจ้งเตือนของเราเอง */
+function downloadIcs(rowNum){
+  const r=rowByNum(rowNum); if(!r||!r.deadline) return;
+  const d=r.deadline.replace(/-/g,'');
+  const nx=new Date(r.deadline); nx.setDate(nx.getDate()+1);
+  const de=nx.toISOString().slice(0,10).replace(/-/g,'');
+  const esc2=t=>String(t||'').replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Qanvas//Tracker//EN','BEGIN:VEVENT',
+    'UID:qanvas-'+rowNum+'-'+d+'@qanvasadvisory.com','DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+de,
+    'SUMMARY:'+esc2(r.task),'DESCRIPTION:'+esc2([r.client,r.deal,r.nextStep].filter(Boolean).join(' · ')),
+    'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a=document.createElement('a');
+  a.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);
+  a.download='Qanvas_'+(r.client||'task').replace(/[^\w-]/g,'')+'_'+r.deadline+'.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+
+/* ═══ [บล็อก 8] ฟอร์ม: เพิ่มงาน / เลื่อนกำหนด ═══ */
+function optList(vals,cur){ return vals.map(v=>`<option value="${esc(v)}"${v===cur?' selected':''}>${esc(v)||'—'}</option>`).join(''); }
+function uniqVals(key){ return [...new Set(STATE.rows.map(r=>r[key]).filter(v=>v&&v!=='—'))].sort(); }
+
+function openAddModal(seed){
+  seed=seed||{};
+  if(!canEdit()){ toast('View-only access'); return; }
+  const el=document.getElementById('formModal');
+  const divisions=uniqVals('division'), clients=uniqVals('client'), owners=uniqVals('owner'), deals=uniqVals('deal');
+  el.innerHTML=`<div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3>${esc(seed._title||'Add task')}</h3><button class="modal-close" id="fmClose" aria-label="Close">✕</button></div>
+    <div class="fm-body">
+      <label class="fm-l">Division<select id="fmDivision">${optList(divisions,seed.division||'')}</select></label>
+      <label class="fm-l">Client<select id="fmClient">${optList(clients,seed.client||'')}</select></label>
+      <label class="fm-l">Deal <span class="fm-hint">pick an existing one where possible</span>
+        <input id="fmDeal" list="fmDealList" value="${esc(seed.deal||'')}" placeholder="—">
+        <datalist id="fmDealList">${deals.map(d=>`<option value="${esc(d)}">`).join('')}</datalist></label>
+      <label class="fm-l fm-wide">Task<textarea id="fmTask" rows="2" placeholder="What has to be done">${esc(seed.task||'')}</textarea></label>
+      <label class="fm-l">Owner<select id="fmOwner">${optList(owners,seed.owner||'')}</select></label>
+      <label class="fm-l">Priority<select id="fmPriority">${optList(['P1','P2','P3'],seed.priority||'P2')}</select></label>
+      <label class="fm-l">Deadline<input type="date" id="fmDeadline" value="${esc(seed.deadline||'')}"></label>
+      <label class="fm-l">Timeframe<select id="fmTimeframe">${optList(['','This Week','This Month','Ongoing','TBD'],seed.timeframe||'')}</select></label>
+      <div class="fm-err" id="fmErr"></div>
+    </div>
+    <div class="modal-foot"><button class="btn-primary" id="fmSave">Save</button><button class="btn-ghost" id="fmCancel">Cancel</button></div>
+  </div>`;
+  el.classList.remove('hidden');
+  const close=()=>el.classList.add('hidden');
+  document.getElementById('fmClose').onclick=close;
+  document.getElementById('fmCancel').onclick=close;
+  el.onclick=e=>{ if(e.target.id==='formModal') close(); };
+  document.getElementById('fmSave').onclick=async()=>{
+    const g=id=>document.getElementById(id).value.trim();
+    const err=document.getElementById('fmErr');
+    if(!g('fmClient')){ err.textContent='Client is required'; return; }
+    if(!g('fmTask')){ err.textContent='Task is required'; return; }
+    if(!g('fmDeadline') && !g('fmTimeframe')){ err.textContent='Give a deadline or a timeframe'; return; }
+    const btn=document.getElementById('fmSave'); btn.disabled=true; btn.textContent='Saving…';
+    try{
+      await api('addRow',{fields:{
+        'Division':g('fmDivision'),'Client':g('fmClient'),'Deal':g('fmDeal'),'Task':g('fmTask'),
+        'Owner':g('fmOwner'),'Priority':g('fmPriority'),'Deadline':g('fmDeadline'),'Timeframe':g('fmTimeframe'),
+        'Status':'Not Started','RAG':'Green'}});
+      close();
+      if(seed._after) await seed._after();
+      await loadData(true);
+      toast('Task added');
+    }catch(e){ err.textContent=e.message||'Could not save'; btn.disabled=false; btn.textContent='Save'; }
+  };
+  setTimeout(()=>{ const t=document.getElementById('fmTask'); if(t&&!seed.task) t.focus(); },50);
+}
+
+function openPostponeModal(r){
+  const el=document.getElementById('formModal');
+  const base=r.deadline||todayISO();
+  const plus=n=>{ const d=new Date(base); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
+  el.innerHTML=`<div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3>Postpone</h3><button class="modal-close" id="pmClose" aria-label="Close">✕</button></div>
+    <div class="fm-body">
+      <div class="fm-task">${esc(r.task)}</div>
+      <div class="fm-quick">
+        <button class="btn-ghost" data-d="${plus(1)}">+1 day</button>
+        <button class="btn-ghost" data-d="${plus(7)}">+1 week</button>
+        <button class="btn-ghost" data-d="${plus(14)}">+2 weeks</button>
+      </div>
+      <label class="fm-l fm-wide">New deadline<input type="date" id="pmDate" value="${esc(plus(7))}"></label>
+      <label class="fm-l fm-wide">Why <span class="fm-hint">saved to remarks, so the history is not lost</span>
+        <input id="pmWhy" placeholder="Waiting on the auditor…"></label>
+      <div class="fm-err" id="pmErr"></div>
+    </div>
+    <div class="modal-foot"><button class="btn-primary" id="pmSave">Save</button><button class="btn-ghost" id="pmCancel">Cancel</button></div>
+  </div>`;
+  el.classList.remove('hidden');
+  const close=()=>el.classList.add('hidden');
+  document.getElementById('pmClose').onclick=close; document.getElementById('pmCancel').onclick=close;
+  el.onclick=e=>{ if(e.target.id==='formModal') close(); };
+  el.querySelectorAll('.fm-quick button').forEach(b=>b.onclick=()=>{ document.getElementById('pmDate').value=b.dataset.d; });
+  document.getElementById('pmSave').onclick=async()=>{
+    const nd=document.getElementById('pmDate').value, why=document.getElementById('pmWhy').value.trim();
+    if(!nd){ document.getElementById('pmErr').textContent='Pick a date'; return; }
+    if(!why){ document.getElementById('pmErr').textContent='One line on why — it keeps the history honest'; return; }
+    const d=new Date(), stamp=('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2);
+    const note='['+stamp+' postponed → '+nd+'] '+why;
+    close();
+    await saveRow(r._row,{deadline:nd, remarks:(r.remarks? r.remarks+' · ':'')+note},{label:'Deadline moved'});
+  };
+}
 
 /* ═══ [บล็อก 6] ตรรกะแอป (JS) ═══ */
 // ---------- i18n ----------
@@ -853,7 +1113,9 @@ const HELP={
   </div>
   <div class="help-section">
    <h4>🔗 Data</h4>
-   <p>Read-only mirror of the Google Sheet. Edit in the sheet (<b>Open sheet ↗</b>) — the app updates automatically.</p>
+   <p>The sheet is still the single source of truth. You can now change <b>Status, Next step, Deadline, client-report flag and notes</b> straight from a task row — the sheet updates within a second.</p>
+   <p>Everything else — client, deal, task wording, deleting rows, pasting a batch from a meeting — stays in the sheet. Use <b>Open row in sheet →</b> inside a task to jump straight there.</p>
+   <p style="color:var(--ink3);font-size:11.5px">You sign in with your Google account. Whoever can edit the sheet can edit here; everyone else sees a read-only view.</p>
   </div>`}
 };
 
@@ -1022,7 +1284,7 @@ function renderTable(){
         <td>${esc(r.owner)}</td>
         <td class="${warn?'warn-cell':''}">${r.deadline?`<span class="dl ${isOverdue(r.deadline,r.status)?'dl-soon':''}">${fmtDate(r.deadline)}</span>`:(r.timeframe?`<span class="tf-tag">${r.timeframe}</span>`:'<span style="color:var(--amber);font-weight:600">⚠ No date</span>')}</td>
       </tr>`;
-      if(open) html+=`<tr class="detail-row"><td colspan="7"><div class="detail-box"><span class="detail-lbl">${t('tl_next')}</span><span class="detail-val${ns?'':' none'}">${ns?esc(ns):'-'}</span></div></td></tr>`;
+      if(open) html+=`<tr class="detail-row"><td colspan="7">${detailPanel(r,ns)}</td></tr>`;
     });
   });
   html+='</tbody></table>';
@@ -1035,6 +1297,89 @@ function renderTable(){
     try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(err){ window.scrollTo(0,0); }
   });
   wrap.querySelectorAll('.task-row').forEach(tr=>tr.onclick=()=>{ const k=tr.dataset.row; STATE.expanded[k]=!STATE.expanded[k]; renderTable(); });
+  bindDetail(wrap);
+}
+
+
+/* ---------- แผงในแถวที่ขยาย: ดูอย่างเดียว = อ่านได้ · Editor = แก้ได้ ---------- */
+function detailPanel(r,ns){
+  const ro=!canEdit();
+  const busy=STATE.saving[r._row]?' saving':'';
+  let h=`<div class="detail-wrap${busy}" data-row="${r._row}">`;
+  if(ro){
+    h+=`<div class="detail-box"><span class="detail-lbl">NEXT</span><span class="detail-val${ns?'':' none'}">${ns?esc(ns):'-'}</span></div>`;
+    if(r.remarks) h+=`<div class="detail-box"><span class="detail-lbl">NOTES</span><span class="detail-val">${esc(r.remarks)}</span></div>`;
+    h+=`<div class="d-foot"><button class="mini-drill d-act" data-act="sheet">Open row in sheet &rarr;</button>`+
+       (r.deadline?`<button class="mini-drill d-act" data-act="ics">Add to my calendar</button>`:'')+`</div></div>`;
+    return h;
+  }
+  h+=`<div class="d-grid">
+      <label class="d-f">Status<select class="d-in" data-f="status">${STATUS_VALUES.map(v=>`<option value="${v}"${v===r.status?' selected':''}>${v}</option>`).join('')}</select></label>
+      <label class="d-f">Deadline<input class="d-in" type="date" data-f="deadline" value="${esc(r.deadline||'')}"></label>
+      <label class="d-f d-wide">Next step<input class="d-in" data-f="nextStep" value="${esc(r.nextStep||'')}" placeholder="One step that can be started right away"></label>
+      <label class="d-chk"><input type="checkbox" data-f="clientView"${isYes(r.clientView)?' checked':''}> Show in client report</label>
+    </div>
+    ${r.remarks?`<div class="detail-box"><span class="detail-lbl">NOTES</span><span class="detail-val">${esc(r.remarks)}</span></div>`:''}
+    <div class="d-acts">
+      <button class="d-btn d-primary d-act" data-act="done">&#10003; Close task</button>
+      <button class="d-btn d-act" data-act="donenext">&#10003;&rarr; Close + next</button>
+      <button class="d-btn d-act" data-act="postpone">Postpone</button>
+      <button class="d-btn d-act" data-act="waiting">Waiting on&hellip;</button>
+      <button class="d-btn d-act" data-act="log">Add note</button>
+      <button class="d-btn d-act" data-act="dup">Duplicate</button>
+    </div>
+    <div class="d-foot"><button class="mini-drill d-act" data-act="sheet">Open row in sheet &rarr;</button>`+
+      (r.deadline?`<button class="mini-drill d-act" data-act="ics">Add to my calendar</button>`:'')+
+    `</div></div>`;
+  return h;
+}
+function bindDetail(root){
+  root.querySelectorAll('.detail-wrap').forEach(w=>{
+    const rowNum=parseInt(w.dataset.row,10);
+    w.onclick=e=>e.stopPropagation();          // คลิกในแผงต้องไม่ไปสั่งหุบแถว
+    w.querySelectorAll('.d-in').forEach(inp=>{
+      const f=inp.dataset.f;
+      inp.onchange=()=>{
+        const patch={}; patch[f]=inp.value;
+        // ปิดงานจากช่อง Status ให้ผลเหมือนกดปุ่ม Close task (กันเคส Done แต่ RAG ยังแดง)
+        if(f==='status'&&inp.value==='Done'){ patch.dateCompleted=todayISO(); patch.rag=''; }
+        if(f==='status'&&inp.value==='Timeline'){ patch.owner=''; }
+        saveRow(rowNum,patch);
+      };
+    });
+    const chk=w.querySelector('input[type=checkbox][data-f="clientView"]');
+    if(chk) chk.onchange=()=>saveRow(rowNum,{clientView:chk.checked?'TRUE':'FALSE'});
+    w.querySelectorAll('.d-act').forEach(b=>b.onclick=()=>{
+      const a=b.dataset.act;
+      if(a==='done') actDone(rowNum);
+      else if(a==='donenext') actDoneNext(rowNum);
+      else if(a==='postpone') actPostpone(rowNum);
+      else if(a==='waiting') actWaiting(rowNum);
+      else if(a==='log') actLog(rowNum);
+      else if(a==='dup') actDuplicate(rowNum);
+      else if(a==='sheet') openRowInSheet(rowNum);
+      else if(a==='ics') downloadIcs(rowNum);
+    });
+  });
+}
+
+/* ---------- กล่องเตือนงานเลยกำหนด (โผล่เมื่อมีจริงเท่านั้น) ---------- */
+function renderOverdue(){
+  const box=document.getElementById('overdueBox'); if(!box) return;
+  const late=STATE.rows.filter(r=>isOverdue(r.deadline,r.status)).sort((a,b)=>a.deadline<b.deadline?-1:1);
+  if(!late.length || !canEdit()){ box.classList.add('hidden'); box.innerHTML=''; return; }
+  box.innerHTML=`<div class="od-head">${late.length} task${late.length>1?'s':''} past the deadline</div>`+
+    late.slice(0,6).map(r=>`<div class="od-row" data-row="${r._row}">
+      <span class="od-d">${fmtDate(r.deadline)}</span>
+      <span class="od-t">${esc(r.task)}<span class="od-m">${esc(r.client)}${r.owner?' &middot; '+esc(r.owner):''}</span></span>
+      <span class="od-b"><button class="d-btn" data-od="done">Close</button><button class="d-btn" data-od="postpone">Postpone</button></span>
+    </div>`).join('')+
+    (late.length>6?`<div class="od-more">+${late.length-6} more</div>`:'');
+  box.classList.remove('hidden');
+  box.querySelectorAll('[data-od]').forEach(b=>b.onclick=()=>{
+    const n=parseInt(b.closest('.od-row').dataset.row,10);
+    b.dataset.od==='done'?actDone(n):actPostpone(n);
+  });
 }
 
 // ---------- render: CARDS ----------
@@ -1125,7 +1470,9 @@ function renderCalDetail(){
   if(!iso||!evs.length){ box.classList.add('hidden'); box.innerHTML=''; hint.textContent=t('cal_hint'); return; }
   hint.textContent='';
   const dt=new Date(iso), dstr=`${dt.getDate()} ${MONTHS_EN[dt.getMonth()]} ${dt.getFullYear()}`;
-  let h=`<div class="cal-detail-head"><span class="cal-detail-date">${dstr}</span><button class="cal-detail-close" id="calDetailClose" aria-label="${t('cal_close')}">✕</button></div>`;
+  let h=`<div class="cal-detail-head"><span class="cal-detail-date">${dstr}</span><div style="display:flex;gap:8px;align-items:center">`+
+    (canEdit()?`<button class="mini-drill" id="calAdd">+ Add on this date</button>`:'')+
+    `<button class="cal-detail-close" id="calDetailClose" aria-label="${t('cal_close')}">✕</button></div></div>`;
   evs.forEach(r=>{
     const rows=[];
     if(r.client) rows.push([t('cal_client'),esc(r.client)]);
@@ -1142,6 +1489,8 @@ function renderCalDetail(){
   box.classList.remove('hidden');
   document.getElementById('calDetailClose').onclick=()=>{ STATE.calSelDate=''; renderCalendar(); };
   bindDrill(box);
+  const ca=document.getElementById('calAdd');
+  if(ca) ca.onclick=()=>openAddModal({deadline:iso, task:'Meeting — ', _title:'Add on '+dstr});
 }
 
 // ---------- render: CUSTOMER TIMELINE ----------
@@ -1302,7 +1651,17 @@ function buildCustomerSummary(){
 }
 function openSummary(){ STATE.sumRange='week'; document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.range==='week')); document.getElementById('summaryText').textContent=buildSummary('week'); document.getElementById('summaryModal').classList.remove('hidden'); }
 function copyText(txt){ navigator.clipboard.writeText(txt).then(()=>toast(t('copied'))); }
-function toast(msg){ const el=document.createElement('div'); el.textContent=msg; el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--teal-d);color:#fff;padding:9px 18px;border-radius:8px;font-size:13.5px;z-index:99;box-shadow:0 4px 16px rgba(0,0,0,.2)'; document.body.appendChild(el); setTimeout(()=>el.remove(),1600); }
+function toast(msg,opts){
+  opts=opts||{};
+  document.querySelectorAll('.qv-toast').forEach(t=>t.remove());
+  const el=document.createElement('div'); el.className='qv-toast';
+  el.innerHTML='<span></span>'+(opts.action?'<button class="qv-toast-a"></button>':'');
+  el.querySelector('span').textContent=msg;
+  if(opts.action){ const b=el.querySelector('.qv-toast-a'); b.textContent=opts.action; b.onclick=()=>{ el.remove(); opts.onAction&&opts.onAction(); }; }
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), opts.action?30000:2600);
+}
+
 function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 // ---------- render dispatcher ----------
@@ -1310,6 +1669,7 @@ function render(){
   applyI18n();
   buildFilters(); buildChips();
   if(STATE.page==='table'){ if(STATE.view==='table'){renderTable();document.getElementById('tableView').classList.remove('hidden');document.getElementById('cardsView').classList.add('hidden');} else {renderCards();document.getElementById('cardsView').classList.remove('hidden');document.getElementById('tableView').classList.add('hidden');} }
+  renderOverdue();
   if(STATE.page==='dashboard') renderDashboard();
   if(STATE.page==='calendar') renderCalendar();
   if(STATE.page==='customer') renderCustomer();
@@ -1357,6 +1717,8 @@ function bindEvents(){
   document.getElementById('toggleDone').onclick=()=>{ STATE.hideDone=!STATE.hideDone; syncToggleBtns(); render(); };
   document.getElementById('toggleTimeline').onclick=()=>{ STATE.hideTimeline=!STATE.hideTimeline; syncToggleBtns(); render(); };
   document.getElementById('btnSummary').onclick=openSummary;
+  const ab=document.getElementById('btnAdd');
+  if(ab) ab.onclick=()=>openAddModal({});
   document.getElementById('sumClose').onclick=()=>document.getElementById('summaryModal').classList.add('hidden');
   document.getElementById('helpBtn').onclick=()=>{ const h=HELP[STATE.lang]; document.getElementById('helpTitle').textContent=h.title; document.getElementById('helpBody').innerHTML=h.body; document.getElementById('helpModal').classList.remove('hidden'); };
   document.getElementById('helpClose').onclick=()=>document.getElementById('helpModal').classList.add('hidden');
@@ -1381,7 +1743,12 @@ function selfCheck(){
     'theme bridge':()=>typeof cssv==='function',
     'checkbox toggles':()=>!!document.querySelector('.tgl-box'),
     'verify counter':()=>typeof isYes==='function',
-    'brand logo':()=>!!document.querySelector('img.logo')
+    'brand logo':()=>!!document.querySelector('img.logo'),
+    'html escaping':()=>typeof esc==='function',
+    'write layer':()=>typeof saveRow==='function',
+    'add form':()=>typeof openAddModal==='function',
+    'undo':()=>typeof armUndo==='function',
+    'overdue box':()=>!!document.getElementById('overdueBox')
   };
   const missing=Object.keys(need).filter(k=>{ try{ return !need[k](); }catch(e){ return true; } });
   const el=document.getElementById('appVer'); if(el) el.textContent=APP_VERSION;
@@ -1393,7 +1760,7 @@ function selfCheck(){
 bindEvents();
 selfCheck();
 loadData();
-if(CONFIG.GOOGLE_SHEET_CSV_URL) setInterval(loadData, CONFIG.POLL_SECONDS*1000);
+if(HAS_API) setInterval(()=>{ if(!STATE.dirtyLock) loadData(true); }, CONFIG.POLL_SECONDS*1000);
 </script>
 </body>
 </html>
