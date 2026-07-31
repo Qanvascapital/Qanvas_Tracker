@@ -251,7 +251,8 @@ tbody tr:hover td{background:var(--row-hover)}
 .cal-ev{font-size:12.5px;padding:3px 6px;border-radius:5px;margin-bottom:3px;background:var(--teal-bg);color:var(--teal-d);line-height:1.3;cursor:default}
 .cal-ev.red{background:var(--red-bg);color:var(--red-fg)}
 .cal-ev.meeting{background:var(--purple-bg);color:var(--purple-fg)}
-.cal-cell.has-ev{cursor:pointer}
+.cal-cell:not(.empty){cursor:pointer}
+.cal-cell:not(.empty):hover{border-color:var(--teal)}
 .cal-cell.sel{border-color:var(--teal);box-shadow:0 0 0 2px var(--teal)}
 .cal-hint{font-size:12px;color:var(--ink3);margin-top:12px}
 .cal-detail{margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
@@ -424,6 +425,17 @@ tbody td{font-size:13.5px}
 }
 
 
+
+
+/* ---- calendar: กล่องรายละเอียดวัน v3.2 ---- */
+.cal-empty{font-size:13px;color:var(--ink3);padding:10px 2px}
+.cal-task.open{background:var(--detail-bg);border-radius:10px;padding:10px 12px;margin:0 -12px 10px}
+.cal-toggle{cursor:pointer;display:flex;gap:7px;align-items:flex-start}
+.cal-caret{color:var(--ink3);transition:transform var(--dur) var(--ease);flex-shrink:0;margin-top:1px}
+.cal-task.open .cal-caret{transform:rotate(90deg)}
+.cal-more{margin-top:8px}
+.cal-task .detail-wrap{padding-left:0}
+#calMine{margin-right:auto}
 
 /* ---- This Week ---- */
 .wk-block{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
@@ -625,6 +637,7 @@ body.can-edit .only-editor{display:inline-flex}
     <div class="cal-head">
       <div class="cal-title" id="calTitle"></div>
       <div style="display:flex;gap:6px">
+        <button class="tgl" id="calMine" title="Show only tasks with my name on them"><span class="tgl-box">✓</span>Only mine</button>
         <button class="btn-ghost" id="calPrev">‹</button>
         <button class="btn-ghost" id="calNext">›</button>
       </div>
@@ -703,7 +716,7 @@ body.can-edit .only-editor{display:inline-flex}
    เชื่อม Google Sheet จริง: ใส่ URL CSV ที่ publish แล้ว
    ตอนนี้ว่าง = ใช้ข้อมูลเดโมฝังในแอป (บล็อก 4)
    ═══════════════════════════════════════════════════════════ */
-const APP_VERSION = "v3.1 · 30 Jul 2026";
+const APP_VERSION = "v3.2 · 31 Jul 2026";
 const CONFIG = {
   // ลิงก์แอปตัวจริง (ผ่าน Apps Script) — ใช้ตอนมีคนเผลอเปิดไฟล์หน้าตาตรง ๆ
   APP_URL: "https://script.google.com/macros/s/AKfycbyrvf2IkFCp0B2REONjztRpg9woUIlUognN27p2K-cZCZs4DxFATEm4TNzsJNCwshC_/exec",
@@ -719,7 +732,7 @@ const DEMO_DATA = [];  // แอปใช้ข้อมูลจากชีต
    ถ้ามี CSV URL → ดึงจากชีต; ถ้าไม่มี → ใช้ DEMO_DATA */
 let STATE = { rows: [], lang: 'en', page: 'table', view: 'table',
   filters: {division:'',client:'',deal:'',status:'',owner:'',search:'',rag:'',verify:'',activeOnly:false},
-  me:{role:'viewer'}, undo:null, dirtyLock:false, saving:{}, collapsed: {}, expanded: {}, calMonth: 6, calYear: 2026, custClient: '', sumRange: 'week', hideDone: false, hideTimeline: false, calSelDate: '', custHideDone: false, custHideTimeline: false, cvClient: '' };
+  me:{role:'viewer'}, calMineOnly:false, undo:null, dirtyLock:false, saving:{}, collapsed: {}, expanded: {}, calMonth: 6, calYear: 2026, custClient: '', sumRange: 'week', hideDone: false, hideTimeline: false, calSelDate: '', custHideDone: false, custHideTimeline: false, cvClient: '' };
 
 /* ═══ ชั้นเชื่อมต่อ — คุยกับ Apps Script (แทน CSV เดิม) ═══
    เหตุผลที่เลิกใช้ CSV: ค้าง 5 นาที · เซลล์ที่มีการขึ้นบรรทัดใหม่ทำให้แถวแตก ·
@@ -1249,6 +1262,11 @@ function goPage(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
   const el=document.getElementById('page-'+page); if(el) el.classList.remove('hidden');
 }
+function goTasksRow(rowNum){
+  const r=rowByNum(rowNum); if(!r) return;
+  STATE.expanded[r._row]=true;                       // กางแถวนั้นรอไว้ จะได้แก้ต่อได้ทันที
+  goTasks({client:r.client, deal:(r.deal&&r.deal!=='—')?r.deal:''});
+}
 function goTasks(patch){
   // เริ่มจากล้างตัวกรองเดิมเสมอ เพื่อไม่ให้ค้างจากการคลิกครั้งก่อน
   STATE.filters={division:'',client:'',deal:'',status:'',owner:'',search:'',rag:'',verify:'',activeOnly:false};
@@ -1520,12 +1538,20 @@ function renderWeek(){
     const a=b.dataset.wk;
     if(a==='done') actDone(n);
     else if(a==='postpone') actPostpone(n);
-    else { const r=rowByNum(n); if(r) goTasks({client:r.client, deal:(r.deal&&r.deal!=='—')?r.deal:''}); }
+    else goTasksRow(n);
   });
 }
 
 // ---------- render: CALENDAR ----------
 function calEvents(iso){
+  if(STATE.calMineOnly && STATE.me && STATE.me.email){
+    const me=(STATE.me.name||STATE.me.email.split('@')[0]||'').toLowerCase();
+    const all=calEventsAll(iso);
+    return all.filter(r=>(r.owner||'').toLowerCase().includes(me)||!r.owner);
+  }
+  return calEventsAll(iso);
+}
+function calEventsAll(iso){
   // ปฏิทินแสดงทุกงานที่มีวันที่ — ไม่ผูกกับปุ่มของหน้า Tasks (ปฏิทินต้องเห็นครบเสมอ)
   return STATE.rows.filter(r=>r.deadline===iso);
 }
@@ -1542,39 +1568,54 @@ function renderCalendar(){
     const evs=calEvents(iso);
     const isToday=iso===CONFIG.TODAY;
     const cls=['cal-cell',isToday?'today':'',evs.length?'has-ev':'',iso===STATE.calSelDate?'sel':''].filter(Boolean).join(' ');
-    html+=`<div class="${cls}"${evs.length?` data-date="${iso}"`:''}><div class="cal-date">${d}</div>`+
+    html+=`<div class="${cls}" data-date="${iso}"><div class="cal-date">${d}</div>`+
       evs.map(r=>{ const isMeet=/ประชุม|meeting/i.test(r.task); const ec=r.rag==='Red'?'red':(isMeet?'meeting':''); return `<div class="cal-ev ${ec}" title="${esc(r.task)}">${esc(r.task).slice(0,18)}</div>`; }).join('')+'</div>';
   }
   const grid=document.getElementById('calGrid');
   grid.innerHTML=html;
-  grid.querySelectorAll('.cal-cell.has-ev').forEach(c=>c.onclick=()=>{ STATE.calSelDate=(STATE.calSelDate===c.dataset.date?'':c.dataset.date); renderCalendar(); });
+  // ทุกวันคลิกได้ รวมวันที่ยังว่าง — จะได้ลงนัดล่วงหน้าในวันที่ยังไม่มีอะไรเลย
+  grid.querySelectorAll('.cal-cell:not(.empty)').forEach(c=>c.onclick=()=>{ STATE.calSelDate=(STATE.calSelDate===c.dataset.date?'':c.dataset.date); renderCalendar(); });
   renderCalDetail();
 }
 function renderCalDetail(){
   const hint=document.getElementById('calHint'), box=document.getElementById('calDetail');
   const iso=STATE.calSelDate;
-  const evs=iso?calEvents(iso):[];
-  if(!iso||!evs.length){ box.classList.add('hidden'); box.innerHTML=''; hint.textContent=t('cal_hint'); return; }
+  if(!iso){ box.classList.add('hidden'); box.innerHTML=''; hint.textContent=t('cal_hint'); return; }
+  const evs=calEvents(iso);
   hint.textContent='';
   const dt=new Date(iso), dstr=`${dt.getDate()} ${MONTHS_EN[dt.getMonth()]} ${dt.getFullYear()}`;
   let h=`<div class="cal-detail-head"><span class="cal-detail-date">${dstr}</span><div style="display:flex;gap:8px;align-items:center">`+
     (canEdit()?`<button class="mini-drill" id="calAdd">+ Add on this date</button>`:'')+
     `<button class="cal-detail-close" id="calDetailClose" aria-label="${t('cal_close')}">✕</button></div></div>`;
+
+  if(!evs.length){
+    h+=`<div class="cal-empty">Nothing booked on this day.${canEdit()?' Use <b>+ Add on this date</b> to put something here.':''}</div>`;
+  }
   evs.forEach(r=>{
+    const openRow=!!STATE.expanded['cal'+r._row];
     const rows=[];
     if(r.client) rows.push([t('cal_client'),esc(r.client)]);
     if(r.deal&&r.deal!=='—') rows.push([t('cal_deal'),esc(r.deal)]);
     if(r.owner) rows.push([t('cal_owner'),esc(r.owner)]);
     rows.push([t('cal_status'),`<span class="pill ${statusClass(r.status)}">${esc(r.status)}</span>`]);
-    if(r.nextStep) rows.push([t('cal_next'),esc(r.nextStep)]);
-    const patch={}; if(r.client) patch.client=r.client; if(r.deal&&r.deal!=='—') patch.deal=r.deal;
-    const link=Object.keys(patch).length?`<button class="mini-drill" data-drill='${JSON.stringify(patch)}'>Open in Tasks →</button>`:'';
-    h+=`<div class="cal-task"><div class="cal-task-t">${esc(r.task)}</div><div class="cal-kv">`+
-      rows.map(kv=>`<span class="k">${kv[0]}</span><span class="v">${kv[1]}</span>`).join('')+`</div>${link}</div>`;
+    h+=`<div class="cal-task${openRow?' open':''}">
+      <div class="cal-task-t cal-toggle" data-row="${r._row}"><span class="cal-caret">▸</span>${esc(r.task)}</div>
+      <div class="cal-kv">`+rows.map(kv=>`<span class="k">${kv[0]}</span><span class="v">${kv[1]}</span>`).join('')+`</div>`+
+      (openRow ? detailPanel(r, r.nextStep)
+               : `<button class="mini-drill cal-more" data-row="${r._row}">${canEdit()?'Update this ▾':'Details ▾'}</button>`)+
+    `</div>`;
   });
   box.innerHTML=h;
   box.classList.remove('hidden');
   document.getElementById('calDetailClose').onclick=()=>{ STATE.calSelDate=''; renderCalendar(); };
+  // กางแผงแก้ไขในที่เดียวกัน ไม่ต้องเด้งไปหน้าอื่นแล้วค่อยหาแถวเอง
+  box.querySelectorAll('.cal-toggle,.cal-more').forEach(el=>el.onclick=e=>{
+    e.stopPropagation();
+    const k='cal'+el.dataset.row;
+    STATE.expanded[k]=!STATE.expanded[k];
+    renderCalDetail();
+  });
+  bindDetail(box);
   bindDrill(box);
   const ca=document.getElementById('calAdd');
   if(ca) ca.onclick=()=>openAddModal({deadline:iso, task:'Meeting — ', _title:'Add on '+dstr});
@@ -1814,6 +1855,8 @@ function bindEvents(){
   document.getElementById('summaryModal').onclick=e=>{ if(e.target.id==='summaryModal') e.currentTarget.classList.add('hidden'); };
   document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{ STATE.sumRange=b.dataset.range; document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x===b)); document.getElementById('summaryText').textContent=buildSummary(b.dataset.range); });
   document.getElementById('btnCopy').onclick=()=>copyText(document.getElementById('summaryText').textContent);
+  const cm=document.getElementById('calMine');
+  if(cm) cm.onclick=()=>{ STATE.calMineOnly=!STATE.calMineOnly; cm.classList.toggle('on',STATE.calMineOnly); renderCalendar(); };
   document.getElementById('calPrev').onclick=()=>{ STATE.calMonth--; if(STATE.calMonth<0){STATE.calMonth=11;STATE.calYear--;} STATE.calSelDate=''; renderCalendar(); };
   document.getElementById('calNext').onclick=()=>{ STATE.calMonth++; if(STATE.calMonth>11){STATE.calMonth=0;STATE.calYear++;} STATE.calSelDate=''; renderCalendar(); };
   document.getElementById('custSelect').onchange=e=>{ STATE.custClient=e.target.value; renderCustomer(); };
@@ -1837,7 +1880,8 @@ function selfCheck(){
     'add form':()=>typeof openAddModal==='function',
     'undo':()=>typeof armUndo==='function',
     'overdue box':()=>!!document.getElementById('overdueBox'),
-    'week page':()=>typeof renderWeek==='function'
+    'week page':()=>typeof renderWeek==='function',
+    'calendar editing':()=>typeof goTasksRow==='function'
   };
   const missing=Object.keys(need).filter(k=>{ try{ return !need[k](); }catch(e){ return true; } });
   const el=document.getElementById('appVer'); if(el) el.textContent=APP_VERSION;
