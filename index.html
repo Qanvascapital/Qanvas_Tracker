@@ -510,6 +510,40 @@ tbody tr.task-row{transition:background .25s var(--ease)}
 /* วงแสงตอนโฟกัสด้วยคีย์บอร์ด — เข้าถึงได้และดูตั้งใจ */
 button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:6px}
 
+
+
+.fm-pre{display:flex;flex-wrap:wrap;gap:6px;margin-top:-4px}
+.fm-pre .btn-ghost{font-size:11.5px;padding:5px 10px}
+
+/* ═══ v3.4 BALANCE — จังหวะและแนวเดียวกันทุกบล็อก ═══ */
+:root{--gap:14px;--gap-s:9px;--col-date:60px;--col-status:104px}
+.wk-block,.od-box{padding:16px 18px;margin-bottom:var(--gap)}
+.wk-h,.od-head{margin-bottom:2px}
+.wk-note{margin-bottom:6px}
+.wk-row,.od-row{display:grid;grid-template-columns:var(--col-date) minmax(0,1fr) var(--col-status) auto;
+  align-items:center;gap:var(--gap);padding:10px 8px;margin:0 -8px}
+.od-row{grid-template-columns:var(--col-date) minmax(0,1fr) auto}
+.wk-d,.od-d{min-width:0;text-align:left}
+.wk-s{justify-self:start}
+.wk-b,.od-b{justify-self:end;gap:var(--gap-s)}
+.wk-t,.od-t{line-height:1.45}
+.wk-m,.od-m{margin-top:2px}
+.d-btn{min-width:74px;text-align:center;padding:7px 12px}
+/* แผงแก้ไข: ให้ทุกก้อนอยู่ในแนวเดียวกันและหายใจเท่ากัน */
+.detail-wrap{padding:10px 0 14px 30px;display:flex;flex-direction:column;gap:12px}
+.d-grid{margin:0}
+.d-acts{margin:0;gap:var(--gap-s)}
+.d-foot{margin:0;gap:var(--gap-s)}
+.detail-wrap .detail-box{display:flex;flex-direction:column;gap:4px;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;padding:10px 12px;margin:0}
+.detail-wrap .detail-lbl{font-size:10.5px;letter-spacing:.05em}
+.chip-muted{background:var(--gray-bg);color:var(--ink3);cursor:default}
+@media(max-width:700px){
+  .wk-row,.od-row{grid-template-columns:var(--col-date) minmax(0,1fr);row-gap:8px}
+  .wk-s{grid-column:2}
+  .wk-b,.od-b{grid-column:1/-1;justify-self:start}
+}
+
 /* ---- This Week ---- */
 .wk-block{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
 .wk-h{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--teal-d);display:flex;align-items:center;gap:8px}
@@ -791,7 +825,7 @@ body.can-edit .only-editor{display:inline-flex}
    เชื่อม Google Sheet จริง: ใส่ URL CSV ที่ publish แล้ว
    ตอนนี้ว่าง = ใช้ข้อมูลเดโมฝังในแอป (บล็อก 4)
    ═══════════════════════════════════════════════════════════ */
-const APP_VERSION = "v3.3 · 31 Jul 2026";
+const APP_VERSION = "v3.5 · 31 Jul 2026";
 const CONFIG = {
   // ลิงก์แอปตัวจริง (ผ่าน Apps Script) — ใช้ตอนมีคนเผลอเปิดไฟล์หน้าตาตรง ๆ
   APP_URL: "https://script.google.com/macros/s/AKfycbyrvf2IkFCp0B2REONjztRpg9woUIlUognN27p2K-cZCZs4DxFATEm4TNzsJNCwshC_/exec",
@@ -807,7 +841,7 @@ const DEMO_DATA = [];  // แอปใช้ข้อมูลจากชีต
    ถ้ามี CSV URL → ดึงจากชีต; ถ้าไม่มี → ใช้ DEMO_DATA */
 let STATE = { rows: [], lang: 'en', page: 'table', view: 'table',
   filters: {division:'',client:'',deal:'',status:'',owner:'',search:'',rag:'',verify:'',activeOnly:false},
-  me:{role:'viewer'}, calMineOnly:false, undo:null, dirtyLock:false, saving:{}, collapsed: {}, expanded: {}, calMonth: 6, calYear: 2026, custClient: '', sumRange: 'week', hideDone: false, hideTimeline: false, calSelDate: '', custHideDone: false, custHideTimeline: false, cvClient: '' };
+  me:{role:'viewer'}, calMineOnly:false, undo:null, dirtyLock:false, saving:{}, collapsed: {}, expanded: {}, calMonth: 6, calYear: 2026, custClient: '', sumRange: 'week', hideDone: true, hideTimeline: false, calSelDate: '', custHideDone: false, custHideTimeline: false, cvClient: '' };
 
 /* ═══ ชั้นเชื่อมต่อ — คุยกับ Apps Script (แทน CSV เดิม) ═══
    เหตุผลที่เลิกใช้ CSV: ค้าง 5 นาที · เซลล์ที่มีการขึ้นบรรทัดใหม่ทำให้แถวแตก ·
@@ -989,10 +1023,12 @@ function actDone(rowNum){
 async function actDoneNext(rowNum){
   const r=rowByNum(rowNum); if(!r) return;
   const nextTitle=(r.nextStep||'').trim();
-  if(!nextTitle){ toast('No next step written on this task'); return; }
+  if(!nextTitle){ toast('Write the next step first, then use this button'); return; }
+  const d=new Date(), stamp=('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2);
   openAddModal({client:r.client,deal:r.deal,division:r.division,subProject:r.subProject,
-    owner:r.owner,task:nextTitle,priority:r.priority||'P2',
-    _after:async()=>{ await actDone(rowNum); }, _title:'Close this task and open the next one'});
+    owner:r.owner,task:nextTitle,priority:r.priority||'P2',timeframe:r.timeframe,
+    _chain:'[รอบต่อจาก '+stamp+'] '+r.task,
+    _after:async()=>{ await actDone(rowNum); }, _title:'Close this task and open the next round'});
 }
 function actPostpone(rowNum){
   const r=rowByNum(rowNum); if(!r) return;
@@ -1061,6 +1097,8 @@ function openAddModal(seed){
         <input id="fmDeal" list="fmDealList" value="${esc(seed.deal||'')}" placeholder="—">
         <datalist id="fmDealList">${deals.map(d=>`<option value="${esc(d)}">`).join('')}</datalist></label>
       <label class="fm-l fm-wide">Task<textarea id="fmTask" rows="2" placeholder="What has to be done">${esc(seed.task||'')}</textarea></label>
+      <div class="fm-quick fm-pre">${['Client review of','Partner review of','Revise after comments on','Send round 2 of']
+        .map(pre=>`<button class="btn-ghost" data-pre="${esc(pre)}">${esc(pre)}…</button>`).join('')}</div>
       <label class="fm-l">Owner<select id="fmOwner">${optList(owners,seed.owner||'')}</select></label>
       <label class="fm-l">Priority<select id="fmPriority">${optList(['P1','P2','P3'],seed.priority||'P2')}</select></label>
       <label class="fm-l">Deadline<input type="date" id="fmDeadline" value="${esc(seed.deadline||'')}"></label>
@@ -1074,6 +1112,12 @@ function openAddModal(seed){
   document.getElementById('fmClose').onclick=close;
   document.getElementById('fmCancel').onclick=close;
   el.onclick=e=>{ if(e.target.id==='formModal') close(); };
+  // เติมคำนำหน้าให้ชื่องานรอบถัดไป — พิมพ์ซ้ำทุกครั้งเสียเวลา
+  el.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{
+    const ta=document.getElementById('fmTask');
+    const base=ta.value.replace(/^(Client review of|Partner review of|Revise after comments on|Send round 2 of)\s+/i,'');
+    ta.value=b.dataset.pre+' '+base; ta.focus();
+  });
   document.getElementById('fmSave').onclick=async()=>{
     const g=id=>document.getElementById(id).value.trim();
     const err=document.getElementById('fmErr');
@@ -1085,7 +1129,8 @@ function openAddModal(seed){
       await api('addRow',{fields:{
         'Division':g('fmDivision'),'Client':g('fmClient'),'Deal':g('fmDeal'),'Task':g('fmTask'),
         'Owner':g('fmOwner'),'Priority':g('fmPriority'),'Deadline':g('fmDeadline'),'Timeframe':g('fmTimeframe'),
-        'Status':'Not Started','RAG':'Green'}});
+        'Status':'Not Started','RAG':'Green',
+        'Remarks':seed._chain||''}});
       close();
       if(seed._after) await seed._after();
       await loadData(true);
@@ -1275,7 +1320,12 @@ function fmtDate(iso){ if(!iso) return ''; const p=iso.split('-'); return p.leng
 function isSoon(iso){ if(!iso) return false; const d=new Date(iso), today=new Date(CONFIG.TODAY); const diff=(d-today)/86400000; return diff<=3; }
 function isOverdue(iso,status){ if(!iso||status==='Done'||status==='Dropped'||status==='Timeline') return false; const d=new Date(iso), today=new Date(CONFIG.TODAY); return d < today; }
 function ragClass(r){ const m={Red:'rag-red',Amber:'rag-amber',Green:'rag-green'}; return m[r.rag]||'rag-none'; }
-function statusClass(s){ return 'st-'+(s||'').toLowerCase().replace(/\s/g,''); }
+function statusClass(s){
+  // สถานะที่พิมพ์เกินมาตรฐานในชีต เช่น "Waiting รอลูกค้า" ต้องยังได้สีตามคำนำหน้า ไม่ใช่กลายเป็นข้อความเปล่า
+  const raw=(s||'').trim();
+  const base=STATUS_VALUES.find(v=>raw.toLowerCase().startsWith(v.toLowerCase()));
+  return 'st-'+((base||raw).toLowerCase().replace(/\s/g,''))+(base&&base!==raw?' st-extra':'');
+}
 function hasWarnBlankTime(r){ return !r.deadline && !r.timeframe && r.task; }
 
 // ---------- filters ----------
@@ -1327,6 +1377,12 @@ function buildChips(){
   if(f.verify) parts.push(`<span class="chip">Needs verifying<button data-clear="verify">×</button></span>`);
   if(f.activeOnly) parts.push(`<span class="chip">Active only<button data-clear="activeOnly">×</button></span>`);
   if(f.search) parts.push(`<span class="chip">"${f.search}"<button data-clear="search">×</button></span>`);
+  const hiddenDone=STATE.hideDone?STATE.rows.filter(r=>r.status==='Done'||r.status==='Dropped').length:0;
+  const hiddenTl=STATE.hideTimeline?STATE.rows.filter(r=>r.status==='Timeline').length:0;
+  if(!f.status && (hiddenDone||hiddenTl)){
+    const bits=[]; if(hiddenDone) bits.push(hiddenDone+' completed'); if(hiddenTl) bits.push(hiddenTl+' timeline');
+    parts.push(`<span class="chip chip-muted" title="Use the toggles above to show them">${bits.join(' · ')} hidden</span>`);
+  }
   if(parts.length) parts.push(`<span class="chip chip-clear"><button data-clear="all">${t('clear_all')}</button></span>`);
   el.innerHTML=parts.join('');
   el.querySelectorAll('[data-clear]').forEach(b=>b.onclick=()=>{
@@ -1404,9 +1460,9 @@ function renderTable(){
     const collapsed=STATE.collapsed[gk];
     const gClient=gk.split(' › ')[0];
     html+=`<tr class="grp-row${collapsed?' collapsed':''}" data-grp="${gk.replace(/"/g,'')}"><td colspan="7"><span class="grp-caret">▾</span>${gk}<span class="grp-count">${groups[gk].length} ${t('unit_task')}</span><button class="grp-jump" data-client="${esc(gClient)}" title="Open this client's timeline">Client →</button></td></tr>`;
-    if(!collapsed) groups[gk].forEach((r,ri)=>{
+    if(!collapsed) groups[gk].forEach((r)=>{
       const warn=hasWarnBlankTime(r);
-      const rk=gk+'#'+ri;
+      const rk=String(r._row);   // เลขแถวจริงในชีต = คีย์ที่ไม่เพี้ยนตามการกรอง/เรียง
       const open=STATE.expanded[rk];
       const ns=(r.nextStep||'').trim();
       html+=`<tr class="task-row${open?' open':''}" data-row="${esc(rk)}" title="${t('row_hint')}">
@@ -1448,7 +1504,10 @@ function detailPanel(r,ns){
     return h;
   }
   h+=`<div class="d-grid">
-      <label class="d-f">Status<select class="d-in" data-f="status">${STATUS_VALUES.map(v=>`<option value="${v}"${v===r.status?' selected':''}>${v}</option>`).join('')}</select></label>
+      <label class="d-f">Status<select class="d-in" data-f="status">${
+        (STATUS_VALUES.indexOf(r.status)<0&&r.status?[r.status]:[]).concat(STATUS_VALUES)
+        .map(v=>`<option value="${esc(v)}"${v===r.status?' selected':''}>${esc(v)}${STATUS_VALUES.indexOf(v)<0?' (as written in sheet)':''}</option>`).join('')
+      }</select></label>
       <label class="d-f">Deadline<input class="d-in" type="date" data-f="deadline" value="${esc(r.deadline||'')}"></label>
       <label class="d-f d-wide">Next step<input class="d-in" data-f="nextStep" value="${esc(r.nextStep||'')}" placeholder="One step that can be started right away"></label>
       <label class="d-chk"><input type="checkbox" data-f="clientView"${isYes(r.clientView)?' checked':''}> Show in client report</label>
@@ -1580,10 +1639,12 @@ function weekBounds(){
   const sun=new Date(mon); sun.setDate(mon.getDate()+6);
   return [mon.toISOString().slice(0,10), sun.toISOString().slice(0,10)];
 }
+const TF_SHORT={'This Week':'WK','This Month':'MO','Ongoing':'ONG','TBD':'TBD'};
+function tfShort(tf){ return TF_SHORT[(tf||'').trim()] || (tf?String(tf).slice(0,3).toUpperCase():'—'); }
 function weekCard(r,tagHtml){
   const late=isOverdue(r.deadline,r.status);
   return `<div class="wk-row" data-row="${r._row}">
-    <span class="wk-d${late?' late':''}">${r.deadline?fmtDate(r.deadline):(r.timeframe||'—')}</span>
+    <span class="wk-d${late?' late':''}" title="${esc(r.deadline?r.deadline:(r.timeframe||''))}">${r.deadline?fmtDate(r.deadline):tfShort(r.timeframe)}</span>
     <span class="wk-t">${esc(r.task)}<span class="wk-m">${esc(r.client)}${r.deal&&r.deal!=='—'?' › '+esc(r.deal):''}${r.owner?' · '+esc(r.owner):''}</span></span>
     <span class="wk-s">${tagHtml||`<span class="pill ${statusClass(r.status)}">${esc(r.status)}</span>`}</span>
     <span class="wk-b">${canEdit()?`<button class="d-btn" data-wk="done">Close</button><button class="d-btn" data-wk="postpone">Postpone</button>`:''}<button class="d-btn" data-wk="open">Open</button></span>
